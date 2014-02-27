@@ -1,0 +1,22 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bootstrapbutton="http://schemas.android.com/apk/res-auto"
+    xmlns:fontawesometext="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.admios.app.MainToggl"
+    tools:ignore="MergeRootFrame" >
+
+    <com.beardedhen.androidbootstrap.BootstrapEditText
+        android:id="@+id/txtOne"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:hint="rounded"
+        android:layout_gravity="center"
+        bootstrapbutton:be_roundedCorners="true"
+        android:gravity="center"
+        bootstrapbutton:be_state="success"
+    />
+</FrameLayout>
