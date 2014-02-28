@@ -100,11 +100,11 @@ public class LoginActivity extends Activity {
             // checkbox status is changed from uncheck to checked.
             if (!isChecked) {
               // show password
-              mCBShowPass.setText(R.string.hide_password);
+              mCBShowPass.setText(R.string.show_password);
               mPasswordView.setTransformationMethod(PasswordTransformationMethod.getInstance());
             } else {
               // hide password
-              mCBShowPass.setText(R.string.show_password);
+              mCBShowPass.setText(R.string.hide_password);
               mPasswordView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
             }
           }
