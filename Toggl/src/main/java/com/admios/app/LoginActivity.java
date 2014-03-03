@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,19 +48,26 @@ public class LoginActivity extends Activity {
     private View mLoginStatusView;
     private CheckBox mCBShowPass;
     private TextView mLoginStatusMessageView;
+    private SharedPreferences credentials;
+  private CheckBox mCBRemenberMe;
 
-    @Override
+  @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
 
+        //preferences
+        credentials = getSharedPreferences("credentials",Context.MODE_PRIVATE);
+
         // Set up the login form.
+        mCBRemenberMe = (CheckBox) findViewById(R.id.check_remember_me);
 
         mEmailView = (EditText) findViewById(R.id.email);
-        mEmailView.setText(getPrimaryEmail(this.getApplicationContext()));
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -70,6 +78,14 @@ public class LoginActivity extends Activity {
                 return false;
             }
         });
+        if(mCBRemenberMe.isChecked()){
+          mPasswordView.setText(credentials.getString("pass",""));
+          mEmailView.setText(credentials.getString("mail",getPrimaryEmail(this.getApplicationContext())));
+        } else {
+          mPasswordView.setText("");
+          mEmailView.setText(getPrimaryEmail(this.getApplicationContext()));
+        }
+
 
         mLoginFormView = findViewById(R.id.login_form);
         mLoginStatusView = findViewById(R.id.login_status);
@@ -102,6 +118,8 @@ public class LoginActivity extends Activity {
             }
           }
         });
+
+
     }
 
     public String getPrimaryEmail(Context context){
@@ -237,6 +255,14 @@ public class LoginActivity extends Activity {
             } catch (InterruptedException e) {
                 return false;
             }
+
+          if(mCBRemenberMe.isChecked()){
+            SharedPreferences.Editor editor=credentials.edit();
+            editor.putString("mail", mEmailView.getText().toString());
+            editor.putString("pass", mPasswordView.getText().toString());
+            editor.commit();
+            finish();
+          }
 
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
