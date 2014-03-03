@@ -17,15 +17,21 @@ android {
             res.srcDirs = ['src/main/res']
         }
     }
+
+
     // This is important, it will run lint checks but won't abort build
     lintOptions {
         abortOnError false
     }
 }
 
+
+
 dependencies {
     compile 'com.android.support:appcompat-v7:19.0.+'
     compile 'com.squareup.retrofit:retrofit:1.2.2'
     compile 'com.android.support:support-v4:19.0.+'
     compile project(':libs:AndroidBootstrap')
+
 }
+
