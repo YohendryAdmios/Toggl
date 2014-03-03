@@ -62,6 +62,7 @@ public class LoginActivity extends Activity {
 
         // Set up the login form.
         mCBRemenberMe = (CheckBox) findViewById(R.id.check_remember_me);
+        mCBRemenberMe.setChecked(credentials.getBoolean("remember", false));
 
         mEmailView = (EditText) findViewById(R.id.email);
 
@@ -255,14 +256,17 @@ public class LoginActivity extends Activity {
             } catch (InterruptedException e) {
                 return false;
             }
-
-          if(mCBRemenberMe.isChecked()){
             SharedPreferences.Editor editor=credentials.edit();
-            editor.putString("mail", mEmailView.getText().toString());
-            editor.putString("pass", mPasswordView.getText().toString());
+            if(mCBRemenberMe.isChecked()){
+              editor.putString("mail", mEmailView.getText().toString());
+              editor.putString("pass", mPasswordView.getText().toString());
+              editor.putBoolean("remember", true);
+
+            } else {
+              editor.putBoolean("remember",false);
+            }
             editor.commit();
             finish();
-          }
 
 //            for (String credential : DUMMY_CREDENTIALS) {
 //                String[] pieces = credential.split(":");
