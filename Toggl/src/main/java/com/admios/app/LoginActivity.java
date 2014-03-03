@@ -1,15 +1,19 @@
 package com.admios.app;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -19,24 +23,13 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.regex.Pattern;
+
 /**
  * Activity which displays a login screen to the user, offering registration as
  * well.
  */
 public class LoginActivity extends Activity {
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello",
-            "bar@example.com:world"
-    };
-
-    /**
-     * The default email to populate the email field with.
-     */
-    public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -62,9 +55,9 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
+
         mEmailView = (EditText) findViewById(R.id.email);
-        mEmailView.setText(mEmail);
+        mEmailView.setText(getPrimaryEmail(this.getApplicationContext()));
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -109,6 +102,18 @@ public class LoginActivity extends Activity {
             }
           }
         });
+    }
+
+    public String getPrimaryEmail(Context context){
+      Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+      String possibleEmail="";
+      Account[] accounts = AccountManager.get(context).getAccounts();
+      for (Account account : accounts) {
+        if (emailPattern.matcher(account.name).matches()) {
+          possibleEmail = account.name;
+        }
+      }
+      return possibleEmail;
     }
 
 
@@ -233,13 +238,13 @@ public class LoginActivity extends Activity {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
+//            for (String credential : DUMMY_CREDENTIALS) {
+//                String[] pieces = credential.split(":");
+//                if (pieces[0].equals(mEmail)) {
+//                    // Account exists, return true if the password matches.
+//                    return pieces[1].equals(mPassword);
+//                }
+//            }
 
             // TODO: register the new account here.
             return true;
