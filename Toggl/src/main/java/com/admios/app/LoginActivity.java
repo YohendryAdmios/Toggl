@@ -21,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -211,10 +212,17 @@ public class LoginActivity extends Activity {
             showProgress(true);
             mAuthTask = new UserLoginTask();
             mAuthTask.execute((Void) null);
+            hideKeyboard();
         }
     }
 
-    /**
+  private void hideKeyboard() {
+    InputMethodManager imm = (InputMethodManager)getSystemService(
+            Context.INPUT_METHOD_SERVICE);
+    imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+  }
+
+  /**
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -266,9 +274,13 @@ public class LoginActivity extends Activity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, Integer> {
+      private static final int OK = 1;
+      private static final int ERROR = -1;
+      private static final int BAD_LOGIN = -2;
+
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected Integer doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             try {
             Gson gson = new GsonBuilder()
@@ -299,23 +311,25 @@ public class LoginActivity extends Activity {
               editor.putString("api_token", user.getData().getApiToken());
               editor.commit();
             } catch (Exception e){
-              Log.e("HEY",e.getCause().toString());
-              return false;
+              if(e.getCause().toString().equalsIgnoreCase(ForbiddenException.class.toString())){
+                return UserLoginTask.BAD_LOGIN;
+              }
+              return UserLoginTask.ERROR;
             }
 
 
             // TODO: register the new account here.
-            return true;
+            return UserLoginTask.OK;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final Integer status) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            if (status == UserLoginTask.OK) {
               startMainToggl();
-            } else {
+            } else if(status == UserLoginTask.BAD_LOGIN) {
                 mPasswordView.setText("");
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

@@ -18,6 +18,10 @@ public class ApiTokenInterceptor implements RequestInterceptor  {
     this.apiToken = apiToken;
   }
 
+  public ApiTokenInterceptor(String apiToken){
+    setApiToken(apiToken);
+  }
+
   @Override
   public void intercept(RequestInterceptor.RequestFacade requestFacade) {
 
@@ -28,6 +32,6 @@ public class ApiTokenInterceptor implements RequestInterceptor  {
   private String encodeCredentialsForBasicAuthorization() {
     final String userAndPassword = getApiToken()+":api_token";
     final int flags = 0;
-    return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), flags);
+    return "Basic " + Base64.encodeToString(userAndPassword.getBytes(),flags);
   }
 }
