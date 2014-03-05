@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bootstrapbutton="http://schemas.android.com/apk/res-auto"
     xmlns:fontawesometext="http://schemas.android.com/apk/res-auto"
+    xmlns:toggl="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -9,10 +10,9 @@
     tools:ignore="MergeRootFrame" >
 
 
-    <TextView
-        android:layout_width="248dp"
-        android:layout_height="320dp"
-        android:text="New Text"
-        android:id="@+id/textView"
+    <ImageView
+        android:layout_width="206dp"
+        android:layout_height="206dp"
+        android:id="@+id/imageView"
         android:layout_gravity="center"/>
 </FrameLayout>
