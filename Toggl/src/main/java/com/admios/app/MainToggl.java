@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.ListView;
 
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
@@ -45,6 +46,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private RestAdapter restAdapter;
   private Gson gson;
   private TogglService service;
+  private List<TimeEntry> timeEntries;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +83,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     start = format(start);
     end = format(end);
 
-    List<TimeEntry> timeEntries = service.timeEntries(start,end);
+    timeEntries = service.timeEntries(start,end);
+
+
     for(TimeEntry timeEntry : timeEntries){
       Log.d("HEY",gson.toJson(timeEntry));
     }
@@ -157,6 +161,19 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       loadTimeEntries();
       return null;
     }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+
+     printListView();
+    }
+  }
+
+  private void printListView() {
+    TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item, timeEntries);
+
+    ListView lv = (ListView)findViewById(R.id.entriesList);
+    lv.setAdapter(adapter);
   }
 
 

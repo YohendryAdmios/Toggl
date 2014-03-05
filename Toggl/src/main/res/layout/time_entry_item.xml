@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="25dp"
         android:text="duration : 02:00 hrs"
-        android:id="@+id/textView"
+        android:id="@+id/durationTextView"
         android:layout_alignBottom="@+id/billiableImageView"
         android:layout_toRightOf="@+id/billiableImageView"
         android:layout_below="@+id/descriptionTextView"
