@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -24,7 +25,19 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.admios.exception.ForbiddenException;
+import com.admios.model.User;
+import com.admios.network.ApiRequestInterceptor;
+import com.admios.network.NetworkErrorHandler;
+import com.admios.network.TogglService;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.regex.Pattern;
+
+import retrofit.RestAdapter;
+import retrofit.converter.GsonConverter;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -58,7 +71,7 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.activity_login);
 
         //preferences
-        credentials = getSharedPreferences("credentials",Context.MODE_PRIVATE);
+        credentials = getSharedPreferences("credentials",MODE_PRIVATE);
 
         // Set up the login form.
         mCBRemenberMe = (CheckBox) findViewById(R.id.check_remember_me);
@@ -125,14 +138,13 @@ public class LoginActivity extends Activity {
 
     public String getPrimaryEmail(Context context){
       Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-      String possibleEmail="";
       Account[] accounts = AccountManager.get(context).getAccounts();
       for (Account account : accounts) {
         if (emailPattern.matcher(account.name).matches()) {
-          possibleEmail = account.name;
+          return account.name;
         }
       }
-      return possibleEmail;
+      return "";
     }
 
 
@@ -249,32 +261,39 @@ public class LoginActivity extends Activity {
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-            SharedPreferences.Editor editor=credentials.edit();
-            if(mCBRemenberMe.isChecked()){
-              editor.putString("mail", mEmailView.getText().toString());
-              editor.putString("pass", mPasswordView.getText().toString());
-              editor.putBoolean("remember", true);
+            Gson gson = new GsonBuilder()
+                  .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                  .create();
 
-            } else {
-              editor.putBoolean("remember",false);
-            }
-            editor.commit();
-            finish();
+              RestAdapter restAdapter;
+              restAdapter = new RestAdapter.Builder()
+                      .setServer("https://www.toggl.com/api/v8")
+                      .setRequestInterceptor(new ApiRequestInterceptor(mEmailView.getText().toString(), mPasswordView.getText().toString()))
+                      .setLogLevel(RestAdapter.LogLevel.FULL)
+                      .setErrorHandler(new NetworkErrorHandler())
+                      .setConverter(new GsonConverter(gson))
+                      .build();
 
-//            for (String credential : DUMMY_CREDENTIALS) {
-//                String[] pieces = credential.split(":");
-//                if (pieces[0].equals(mEmail)) {
-//                    // Account exists, return true if the password matches.
-//                    return pieces[1].equals(mPassword);
-//                }
-//            }
+              TogglService service = restAdapter.create(TogglService.class);
+              User user = service.login();
+              Log.d("HEY", gson.toJson(user));
+              SharedPreferences.Editor editor = credentials.edit();
+              if(mCBRemenberMe.isChecked()){
+                editor.putString("mail", mEmailView.getText().toString());
+                editor.putString("pass", mPasswordView.getText().toString());
+                editor.putBoolean("remember", true);
+
+              } else {
+                editor.putBoolean("remember",false);
+              }
+              editor.putString("api_token", user.getData().getApiToken());
+              editor.commit();
+            } catch (Exception e){
+              Log.e("HEY",e.getCause().toString());
+              return false;
+            }
+
 
             // TODO: register the new account here.
             return true;
@@ -286,7 +305,7 @@ public class LoginActivity extends Activity {
             showProgress(false);
 
             if (success) {
-                finish();
+                //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

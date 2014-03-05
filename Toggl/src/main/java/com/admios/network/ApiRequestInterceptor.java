@@ -1,4 +1,4 @@
-package main.java.com.admios.network;
+package com.admios.network;
 
 import android.util.Base64;
 
@@ -7,7 +7,31 @@ import retrofit.RequestInterceptor;
 /**
  * Created by yohendryhurtado on 3/3/14.
  */
-public class ApiRequestInterceptor implements RequestInterceptor{
+public class ApiRequestInterceptor implements RequestInterceptor {
+  private String username;
+  private String password;
+
+  public ApiRequestInterceptor(String username, String password) {
+    this.username = username;
+    this.password = password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+
+  public String getUsername() {
+    return username;
+  }
 
   @Override
   public void intercept(RequestFacade requestFacade) {
@@ -17,9 +41,8 @@ public class ApiRequestInterceptor implements RequestInterceptor{
   }
 
   private String encodeCredentialsForBasicAuthorization() {
-    final String userAndPassword = "yohendry.hurtado@admios-sa.com:jyy212629";
     final int flags = 0;
-    return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), flags);
+    return "Basic " + Base64.encodeToString((getUsername() + ":" + getPassword()).getBytes(), flags);
   }
 
 }
