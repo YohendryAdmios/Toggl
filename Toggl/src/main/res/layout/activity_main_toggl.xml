@@ -8,15 +8,11 @@
     tools:context="com.admios.app.MainToggl"
     tools:ignore="MergeRootFrame" >
 
-    <com.beardedhen.androidbootstrap.BootstrapEditText
-        android:id="@+id/txtOne"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:hint="rounded"
-        android:layout_gravity="center"
-        bootstrapbutton:be_roundedCorners="true"
-        android:gravity="center"
-        bootstrapbutton:be_state="success"
-    />
+
+    <TextView
+        android:layout_width="248dp"
+        android:layout_height="320dp"
+        android:text="New Text"
+        android:id="@+id/textView"
+        android:layout_gravity="center"/>
 </FrameLayout>

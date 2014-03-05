@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -63,6 +64,7 @@ public class LoginActivity extends Activity {
     private TextView mLoginStatusMessageView;
     private SharedPreferences credentials;
   private CheckBox mCBRemenberMe;
+  private User user;
 
   @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,6 +255,13 @@ public class LoginActivity extends Activity {
         }
     }
 
+    private void startMainToggl(){
+      Intent intent = new Intent(this, MainToggl.class);
+      Gson gson = new Gson();
+      intent.putExtra("user",gson.toJson(user));
+      startActivity(intent);
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -276,7 +285,7 @@ public class LoginActivity extends Activity {
                       .build();
 
               TogglService service = restAdapter.create(TogglService.class);
-              User user = service.login();
+              user = service.login();
               Log.d("HEY", gson.toJson(user));
               SharedPreferences.Editor editor = credentials.edit();
               if(mCBRemenberMe.isChecked()){
@@ -305,8 +314,9 @@ public class LoginActivity extends Activity {
             showProgress(false);
 
             if (success) {
-                //finish();
+              startMainToggl();
             } else {
+                mPasswordView.setText("");
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
