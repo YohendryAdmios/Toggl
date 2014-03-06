@@ -197,19 +197,22 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   private List<TimeEntry> prepareList(){
     List<TimeEntry> list = new ArrayList<TimeEntry>();
+    TimeEntry lastSeparator = null;
     Date lastDate = null;
     for (TimeEntry te : timeEntries){
 
       if((lastDate != null)){
         if(te.getStart().before(lastDate)){
-          list.add(createSeparator(te.getStart()));
+          lastSeparator = createSeparator(te.getStart());
+          list.add(lastSeparator);
           lastDate = te.getStart();
         }
       } else {
-        list.add(createSeparator(te.getStart()));
+        lastSeparator = createSeparator(te.getStart());
+        list.add(lastSeparator);
         lastDate = te.getStart();
       }
-
+      lastSeparator.setDuration(lastSeparator.getDuration()+te.getDuration());
       list.add(te);
     }
     return list;

@@ -39,6 +39,7 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   private TreeSet mSeparatorsSet = new TreeSet();
   private LayoutInflater inflater;
   private TextView dateTextView;
+  private TextView totalTextView;
 
   public TimeEntryAdapter(Context context, int layoutResourceId) {
     super(context, layoutResourceId);
@@ -89,21 +90,21 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   public View getView(int position, View convertView, ViewGroup parent) {
     int type = getItemViewType(position);
 
-      // inflate the layout
-      switch (type) {
-        case TYPE_ITEM:
-          convertView = createItem(position,convertView,parent);
-          break;
-        case TYPE_SEPARATOR:
-          convertView = createSeparator(position,convertView,parent);
-          break;
-      }
+    // inflate the layout
+    switch (type) {
+      case TYPE_ITEM:
+        convertView = createItem(position, convertView, parent);
+        break;
+      case TYPE_SEPARATOR:
+        convertView = createSeparator(position, convertView, parent);
+        break;
+    }
 
     return convertView;
 
   }
 
-  private View createItem(int position,View convertView,ViewGroup parent){
+  private View createItem(int position, View convertView, ViewGroup parent) {
     convertView = inflater.inflate(R.layout.time_entry_item, parent, false);
     // object item based on the position
     timeEntry = timeEntries.get(position);
@@ -112,12 +113,11 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     durationTextView = (TextView) convertView.findViewById(R.id.durationTextView);
 
     drawableId = R.drawable.bill_off;
-    if(timeEntry.isBilliable()){
+    if (timeEntry.isBilliable()) {
       drawableId = R.drawable.bill_on;
     }
     Picasso.with(context).load(R.drawable.bill_on).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
-
 
 
     durationTextView.setText("Fecha : " +
@@ -125,18 +125,22 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     return convertView;
   }
 
-  private View createSeparator(int position,View convertView,ViewGroup parent){
+  private View createSeparator(int position, View convertView, ViewGroup parent) {
     convertView = inflater.inflate(R.layout.time_entry_separator, parent, false);
     // object item based on the position
-
+    timeEntry = timeEntries.get(position);
     dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
-    dateTextView.setText(this.formatDate(timeEntries.get(position).getStart()));
+    dateTextView.setText(this.formatDate(timeEntry.getStart()));
+    totalTextView = (TextView) convertView.findViewById(R.id.durationTextView);
+    totalTextView.setText("Total : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
+
+
 
 
     return convertView;
   }
 
-  private String formatDate(Date date){
+  private String formatDate(Date date) {
     return new SimpleDateFormat("MM-dd-yyyy").format(date);
   }
 }

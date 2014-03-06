@@ -22,7 +22,17 @@
         android:layout_alignBottom="@+id/imageView"
         android:layout_toRightOf="@+id/imageView"
         android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:layout_toLeftOf="@+id/durationTextView"/>
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="Total : 99 Hrs"
+        android:id="@+id/durationTextView"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/dateTextView"
         android:gravity="center_vertical"/>
 </RelativeLayout>

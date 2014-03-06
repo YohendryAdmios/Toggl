@@ -17,7 +17,7 @@ public class TimeEntry {
   private boolean billiable;
   private String start;
   private String stop;
-  private int duration;
+  private int duration = 0;
   private String description;
   private String at;
   private int type = ITEM;
