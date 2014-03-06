@@ -28,7 +28,9 @@ import com.squareup.picasso.Picasso;
 import org.w3c.dom.Comment;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -52,6 +54,11 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private Gson gson;
   private TogglService service;
   private List<TimeEntry> timeEntries;
+  private String timeFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+  private String appDateFormat = "yyyy-MM-dd";
+
+  private SimpleDateFormat appDateSimpleFormater;
+  private SimpleDateFormat serverDateSimpleFormater;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +70,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     buildApiAdapter();
     LoadImageTask lit = new LoadImageTask();
     lit.execute((Void) null);
+    appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
+    serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
 
   }
   private void buildApiAdapter(){
@@ -83,9 +92,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void loadTimeEntries() {
     //call the service
     //mock dates 08/01/2013 and 08/30/2013
-    String timeFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
-    String start = new SimpleDateFormat(timeFormat).format(new Date(1375333200000L));
-    String end = new SimpleDateFormat(timeFormat).format(new Date(1377838800000L));
+
+    String start = serverDateSimpleFormater.format(new Date(1375333200000L));
+    String end = serverDateSimpleFormater.format(new Date(1377838800000L));
     start = format(start);
     end = format(end);
 
@@ -162,12 +171,49 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void printListView() {
-    TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item, timeEntries);
-
+    TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item);
     ListView lv = (ListView)findViewById(R.id.entriesList);
     lv.setAdapter(adapter);
+
+    List<TimeEntry> list = prepareList();
+    for(TimeEntry timeEntry : list) {
+      if(timeEntry.getType() == TimeEntry.ITEM){
+        adapter.addTimeEntry(timeEntry);
+      } else {
+        adapter.addSeparatorItem(timeEntry);
+      }
+      Log.d("HEY",gson.toJson(timeEntry));
+    }
+
+
   }
 
+  private TimeEntry createSeparator(Date date){
+    TimeEntry te = new TimeEntry();
+    te.setType(TimeEntry.SEPARATOR);
+    te.setStart(new SimpleDateFormat(timeFormat).format(date));
+    return te;
+  }
+
+  private List<TimeEntry> prepareList(){
+    List<TimeEntry> list = new ArrayList<TimeEntry>();
+    Date lastDate = null;
+    for (TimeEntry te : timeEntries){
+
+      if((lastDate != null)){
+        if(te.getStart().before(lastDate)){
+          list.add(createSeparator(te.getStart()));
+          lastDate = te.getStart();
+        }
+      } else {
+        list.add(createSeparator(te.getStart()));
+        lastDate = te.getStart();
+      }
+
+      list.add(te);
+    }
+    return list;
+  }
 
   private void changeProfileData(Drawable drawable) {
     mi.setIcon(drawable);
@@ -178,7 +224,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     @Override
     public int compare(TimeEntry lhs, TimeEntry rhs) {
-      return rhs.getAt().compareTo(lhs.getAt());
+      return rhs.getStart().compareTo(lhs.getStart());
     }
   }
 }

@@ -14,8 +14,10 @@ import com.admios.model.TimeEntry;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Created by yohendryhurtado on 3/5/14.
@@ -30,22 +32,79 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   private TextView descripctionTextView;
   private TextView durationTextView;
 
-  public TimeEntryAdapter(Context context, int layoutResourceId, List<TimeEntry> timeEntries) {
-    super(context, layoutResourceId, timeEntries);
+  private static final int TYPE_ITEM = 0;
+  private static final int TYPE_SEPARATOR = 1;
+  private static final int TYPE_MAX_COUNT = TYPE_SEPARATOR + 1;
+
+  private TreeSet mSeparatorsSet = new TreeSet();
+  private LayoutInflater inflater;
+  private TextView dateTextView;
+
+  public TimeEntryAdapter(Context context, int layoutResourceId) {
+    super(context, layoutResourceId);
     this.context = context;
     this.layoutResourceId = layoutResourceId;
-    this.timeEntries = timeEntries;
+    this.timeEntries = new ArrayList<TimeEntry>();
+    inflater = ((Activity) context).getLayoutInflater();
+  }
+
+  public void addTimeEntry(final TimeEntry item) {
+    timeEntries.add(item);
+    notifyDataSetChanged();
+  }
+
+  public void addSeparatorItem(final TimeEntry item) {
+    timeEntries.add(item);
+    // save separator position
+    mSeparatorsSet.add(timeEntries.size() - 1);
+    notifyDataSetChanged();
+  }
+
+  @Override
+  public int getItemViewType(int position) {
+    return mSeparatorsSet.contains(position) ? TYPE_SEPARATOR : TYPE_ITEM;
+  }
+
+  @Override
+  public int getViewTypeCount() {
+    return TYPE_MAX_COUNT;
+  }
+
+  @Override
+  public int getCount() {
+    return timeEntries.size();
+  }
+
+  @Override
+  public TimeEntry getItem(int position) {
+    return timeEntries.get(position);
+  }
+
+  @Override
+  public long getItemId(int position) {
+    return position;
   }
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
+    int type = getItemViewType(position);
 
-    if(convertView==null){
       // inflate the layout
-      LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-      convertView = inflater.inflate(layoutResourceId, parent, false);
-    }
+      switch (type) {
+        case TYPE_ITEM:
+          convertView = createItem(position,convertView,parent);
+          break;
+        case TYPE_SEPARATOR:
+          convertView = createSeparator(position,convertView,parent);
+          break;
+      }
 
+    return convertView;
+
+  }
+
+  private View createItem(int position,View convertView,ViewGroup parent){
+    convertView = inflater.inflate(R.layout.time_entry_item, parent, false);
     // object item based on the position
     timeEntry = timeEntries.get(position);
     billiableImageView = (ImageView) convertView.findViewById(R.id.billiableImageView);
@@ -62,9 +121,19 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
 
 
     durationTextView.setText("Fecha : " +
-            this.formatDate(timeEntry.getAt()) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
+            this.formatDate(timeEntry.getStart()) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
     return convertView;
+  }
 
+  private View createSeparator(int position,View convertView,ViewGroup parent){
+    convertView = inflater.inflate(R.layout.time_entry_separator, parent, false);
+    // object item based on the position
+
+    dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
+    dateTextView.setText(this.formatDate(timeEntries.get(position).getStart()));
+
+
+    return convertView;
   }
 
   private String formatDate(Date date){

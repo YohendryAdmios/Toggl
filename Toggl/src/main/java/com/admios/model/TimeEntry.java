@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TimeEntry {
+  public static final int ITEM = 1;
+  public static final int SEPARATOR = 2;
   private int id;
   private String guid;
   private int pid;
@@ -18,6 +20,15 @@ public class TimeEntry {
   private int duration;
   private String description;
   private String at;
+  private int type = ITEM;
+
+  public void setType(int type) {
+    this.type = type;
+  }
+
+  public int getType(){
+    return this.type;
+  }
 
   public int getId() {
     return id;
@@ -52,7 +63,7 @@ public class TimeEntry {
   }
 
   public Date getStart() {
-    return getDate(this.start);
+    return getShortDate(this.start);
   }
 
   public void setStart(String start) {
@@ -60,7 +71,7 @@ public class TimeEntry {
   }
 
   public Date getStop() {
-    return getDate(this.stop);
+    return getShortDate(this.stop);
   }
 
   public void setStop(String stop) {
@@ -84,7 +95,20 @@ public class TimeEntry {
   }
 
   public Date getAt() {
-    return getDate(this.at);
+    return getShortDate(this.at);
+  }
+
+  private Date getShortDate(String at) {
+    return formatDate("yyyy-MM-dd",at);
+  }
+
+  private Date formatDate(String format,String date){
+    try {
+      return new SimpleDateFormat(format).parse(date.substring(0,date.length()-6));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public void setAt(String at) {
@@ -92,13 +116,7 @@ public class TimeEntry {
     this.at = at;
   }
 
-  private Date getDate(String date){
-    String timeFormat = "yyyy-MM-dd'T'HH:mm:ss";
-    try {
-      return new SimpleDateFormat(timeFormat).parse(date.substring(0,date.length()-6));
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return null;
+  private Date getFullDate(String date){
+    return formatDate("yyyy-MM-dd'T'HH:mm:ss",date);
   }
 }
