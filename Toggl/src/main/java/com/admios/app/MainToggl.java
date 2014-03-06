@@ -56,7 +56,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     loadUser();
     changeTitle();
     buildApiAdapter();
-    new TimeEntriesCaller().execute();
+    LoadImageTask lit = new LoadImageTask();
+    lit.execute((Void) null);
 
   }
   private void buildApiAdapter(){
@@ -116,8 +117,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     getMenuInflater().inflate(R.menu.main_toggl, menu);
 
     mi = (MenuItem) menu.findItem(R.id.action_profile);
-    LoadImageTask lit = new LoadImageTask();
-    lit.execute((Void) null);
+
     return super.onCreateOptionsMenu(menu);
   }
 
@@ -138,6 +138,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                 .error(R.drawable.abc_ic_clear)
                 .get();
         Drawable d = new BitmapDrawable(getResources(), bm);
+        loadTimeEntries();
         return d;
       } catch (IOException e) {
         Log.e("HEY", e.getMessage());
@@ -151,21 +152,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       if (drawable != null) {
         changeProfileData(drawable);
       }
-    }
-  }
-
-  private class TimeEntriesCaller extends AsyncTask<Void, Void, Void> {
-
-    @Override
-    protected Void doInBackground(Void... voids) {
-      loadTimeEntries();
-      return null;
-    }
-
-    @Override
-    protected void onPostExecute(Void aVoid) {
-
-     printListView();
+      printListView();
     }
   }
 

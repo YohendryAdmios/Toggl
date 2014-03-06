@@ -1,6 +1,5 @@
 package com.admios.app;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,6 +12,8 @@ import android.widget.TextView;
 import com.admios.model.TimeEntry;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,7 +24,6 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   private int layoutResourceId;
   List<TimeEntry> timeEntries;
   private int drawableId;
-  private String billiable;
   private TimeEntry timeEntry;
   private ImageView billiableImageView;
   private TextView descripctionTextView;
@@ -52,15 +52,21 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     durationTextView = (TextView) convertView.findViewById(R.id.durationTextView);
 
     drawableId = R.drawable.bill_off;
-    billiable = context.getString(R.string.no_billiable);
     if(timeEntry.isBilliable()){
-      billiable = context.getString(R.string.billiable);
       drawableId = R.drawable.bill_on;
     }
     Picasso.with(context).load(R.drawable.bill_on).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
-    durationTextView.setText("Duration : "+(timeEntry.getDuration()/60/60)+ "Hrs");
+
+
+
+    durationTextView.setText("Fecha : " +
+            this.formatDate(timeEntry.getAt()) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
     return convertView;
 
+  }
+
+  private String formatDate(Date date){
+    return new SimpleDateFormat("MM-dd-yyyy").format(date);
   }
 }

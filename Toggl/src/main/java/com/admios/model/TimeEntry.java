@@ -93,9 +93,9 @@ public class TimeEntry {
   }
 
   private Date getDate(String date){
-    String timeFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+    String timeFormat = "yyyy-MM-dd'T'HH:mm:ss";
     try {
-      return new SimpleDateFormat(timeFormat).parse(date);
+      return new SimpleDateFormat(timeFormat).parse(date.substring(0,date.length()-6));
     } catch (ParseException e) {
       e.printStackTrace();
     }
