@@ -23,6 +23,8 @@
         android:layout_height="match_parent"
         android:id="@+id/entriesList"
         android:layout_gravity="center"
-        android:layout_marginTop="100dp"
-        android:padding="5dp"/>
+        android:layout_marginTop="85dp"
+        android:padding="5dp"
+        android:layout_marginBottom="25dp"
+        />
 </FrameLayout>

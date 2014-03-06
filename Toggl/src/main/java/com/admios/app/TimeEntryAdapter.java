@@ -1,5 +1,6 @@
 package com.admios.app;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.admios.model.TimeEntry;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -20,6 +22,13 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   private Context context;
   private int layoutResourceId;
   List<TimeEntry> timeEntries;
+  private int drawableId;
+  private String billiable;
+  private TimeEntry timeEntry;
+  private ImageView billiableImageView;
+  private TextView descripctionTextView;
+  private TextView durationTextView;
+
   public TimeEntryAdapter(Context context, int layoutResourceId, List<TimeEntry> timeEntries) {
     super(context, layoutResourceId, timeEntries);
     this.context = context;
@@ -37,17 +46,20 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     }
 
     // object item based on the position
-    TimeEntry timeEntry = timeEntries.get(position);
-    ImageView billiableImageView = (ImageView) convertView.findViewById(R.id.billiableImageView);
-    TextView descripctionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
-    TextView durationTextView = (TextView) convertView.findViewById(R.id.durationTextView);
+    timeEntry = timeEntries.get(position);
+    billiableImageView = (ImageView) convertView.findViewById(R.id.billiableImageView);
+    descripctionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
+    durationTextView = (TextView) convertView.findViewById(R.id.durationTextView);
 
-    if(timeEntry.isBilliable()) billiableImageView.setBackground(convertView.getResources().getDrawable(R.drawable.bill_on));
-    else {
-      billiableImageView.setBackground(convertView.getResources().getDrawable(R.drawable.bill_off));
+    drawableId = R.drawable.bill_off;
+    billiable = context.getString(R.string.no_billiable);
+    if(timeEntry.isBilliable()){
+      billiable = context.getString(R.string.billiable);
+      drawableId = R.drawable.bill_on;
     }
+    Picasso.with(context).load(R.drawable.bill_on).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
-    durationTextView.setTag("Duration : "+timeEntry.getDuration());
+    durationTextView.setText("Duration : "+(timeEntry.getDuration()/60/60)+ "Hrs");
     return convertView;
 
   }

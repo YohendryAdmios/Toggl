@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/libs/AndroidBootstrap/AndroidBootstrap.iml" filepath="$PROJECT_DIR$/libs/AndroidBootstrap/AndroidBootstrap.iml" />
       <module fileurl="file://$PROJECT_DIR$/Toggl/Toggl.iml" filepath="$PROJECT_DIR$/Toggl/Toggl.iml" />
       <module fileurl="file://$PROJECT_DIR$/TogglAdmiosApp.iml" filepath="$PROJECT_DIR$/TogglAdmiosApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
     </modules>
   </component>
 </project>
