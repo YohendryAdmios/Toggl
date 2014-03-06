@@ -1,6 +1,5 @@
 package com.admios.app;
 
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,9 +13,9 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ListView;
 
+import com.admios.app.util.TimeEntryAdapter;
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
-import com.admios.network.ApiRequestInterceptor;
 import com.admios.network.ApiTokenInterceptor;
 import com.admios.network.NetworkErrorHandler;
 import com.admios.network.TogglService;
@@ -26,13 +25,19 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Comment;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
+
+
 
 public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigationListener {
 
@@ -85,7 +90,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     end = format(end);
 
     timeEntries = service.timeEntries(start,end);
-
+    Collections.sort(timeEntries,new TimeEntryComparator());
 
     for(TimeEntry timeEntry : timeEntries){
       Log.d("HEY",gson.toJson(timeEntry));
@@ -167,5 +172,13 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void changeProfileData(Drawable drawable) {
     mi.setIcon(drawable);
     mi.setTitle(user.getData().getFullname());
+  }
+
+  private class TimeEntryComparator implements Comparator<TimeEntry> {
+
+    @Override
+    public int compare(TimeEntry lhs, TimeEntry rhs) {
+      return rhs.getAt().compareTo(lhs.getAt());
+    }
   }
 }

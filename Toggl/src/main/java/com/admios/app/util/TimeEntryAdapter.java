@@ -1,4 +1,4 @@
-package com.admios.app;
+package com.admios.app.util;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.admios.app.R;
 import com.admios.model.TimeEntry;
 import com.squareup.picasso.Picasso;
 
