@@ -10,8 +10,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.admios.app.util.TimeEntryAdapter;
 import com.admios.model.TimeEntry;
@@ -47,7 +50,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
    * The serialization (saved instance state) Bundle key representing the
    * current dropdown position.
    */
-  private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
   private User user;
   private MenuItem mi;
   private RestAdapter restAdapter;
@@ -59,20 +61,31 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   private SimpleDateFormat appDateSimpleFormater;
   private SimpleDateFormat serverDateSimpleFormater;
+  private View mMainContainer;
+  private View mLoadingView;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main_toggl);
+    mMainContainer = findViewById(R.id.container);
+    mLoadingView = findViewById(R.id.loading_status);
+
+
     hideKeyboard();
     loadUser();
     changeTitle();
     buildApiAdapter();
     LoadImageTask lit = new LoadImageTask();
     lit.execute((Void) null);
+
     appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
     serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
+  }
 
+  private void showLoading(boolean show){
+    mLoadingView.setVisibility(show ? View.VISIBLE : View.GONE);
+    mMainContainer.setVisibility(show ? View.GONE : View.VISIBLE);
   }
   private void buildApiAdapter(){
     gson = new GsonBuilder()
@@ -142,9 +155,15 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private class LoadImageTask extends AsyncTask<Void, Void, Drawable> {
+    @Override
+    protected void onPreExecute() {
+      showLoading(true);
+      super.onPreExecute();
+    }
 
     @Override
     protected Drawable doInBackground(Void... voids) {
+
       try {
         Bitmap bm = Picasso.with(getApplicationContext())
                 .load(user.getData().getImageUrl())
@@ -163,11 +182,25 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     @Override
     protected void onPostExecute(Drawable drawable) {
+      showLoading(false);
       if (drawable != null) {
         changeProfileData(drawable);
       }
       printListView();
     }
+
+    @Override
+    protected void onCancelled() {
+      showLoading(false);
+      super.onCancelled();
+    }
+
+    @Override
+    protected void onCancelled(Drawable drawable) {
+      showLoading(false);
+      super.onCancelled(drawable);
+    }
+
   }
 
   private void printListView() {
