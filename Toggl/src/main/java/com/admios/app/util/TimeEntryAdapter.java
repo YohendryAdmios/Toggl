@@ -135,8 +135,6 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     totalTextView.setText("Total : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
 
 
-
-
     return convertView;
   }
 

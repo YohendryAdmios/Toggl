@@ -4,17 +4,15 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.admios.app.util.TimeEntryAdapter;
 import com.admios.model.TimeEntry;
@@ -28,10 +26,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Comment;
-
 import java.io.IOException;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +36,6 @@ import java.util.List;
 
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
-
 
 
 public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigationListener {
@@ -76,18 +70,22 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     loadUser();
     changeTitle();
     buildApiAdapter();
-    LoadImageTask lit = new LoadImageTask();
-    lit.execute((Void) null);
+    refresh();
 
     appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
     serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
   }
 
-  private void showLoading(boolean show){
+  private void refresh(){
+    new LoadImageTask().execute();
+  }
+
+  private void showLoading(boolean show) {
     mLoadingView.setVisibility(show ? View.VISIBLE : View.GONE);
     mMainContainer.setVisibility(show ? View.GONE : View.VISIBLE);
   }
-  private void buildApiAdapter(){
+
+  private void buildApiAdapter() {
     gson = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(Date.class, new DateTypeAdapter())
@@ -102,6 +100,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
             .build();
     service = restAdapter.create(TogglService.class);
   }
+
   private void loadTimeEntries() {
     //call the service
     //mock dates 08/01/2013 and 08/30/2013
@@ -111,17 +110,17 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     start = format(start);
     end = format(end);
 
-    timeEntries = service.timeEntries(start,end);
-    Collections.sort(timeEntries,new TimeEntryComparator());
+    timeEntries = service.timeEntries(start, end);
+    Collections.sort(timeEntries, new TimeEntryComparator());
 
-    for(TimeEntry timeEntry : timeEntries){
-      Log.d("HEY",gson.toJson(timeEntry));
+    for (TimeEntry timeEntry : timeEntries) {
+      Log.d("HEY", gson.toJson(timeEntry));
     }
 
   }
 
   private String format(String date) {
-    return date.substring(0,date.length()-2) + ":" + date.substring(date.length()-2,date.length());
+    return date.substring(0, date.length() - 2) + ":" + date.substring(date.length() - 2, date.length());
   }
 
   private void changeTitle() {
@@ -148,10 +147,28 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     return super.onCreateOptionsMenu(menu);
   }
 
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_refresh:
+        refresh();
+        return true;
+      case R.id.action_log_out:
+        logOut();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
+  }
+
+  private void logOut() {
+    getPreferences(MODE_PRIVATE).edit().remove("api_token").commit();
+    finish();
+  }
 
   @Override
-  public boolean onNavigationItemSelected(int position, long id) {
-    return true;
+  public boolean onNavigationItemSelected(int i, long l) {
+    return false;
   }
 
   private class LoadImageTask extends AsyncTask<Void, Void, Drawable> {
@@ -205,37 +222,37 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   private void printListView() {
     TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item);
-    ListView lv = (ListView)findViewById(R.id.entriesList);
+    ListView lv = (ListView) findViewById(R.id.entriesList);
     lv.setAdapter(adapter);
 
     List<TimeEntry> list = prepareList();
-    for(TimeEntry timeEntry : list) {
-      if(timeEntry.getType() == TimeEntry.ITEM){
+    for (TimeEntry timeEntry : list) {
+      if (timeEntry.getType() == TimeEntry.ITEM) {
         adapter.addTimeEntry(timeEntry);
       } else {
         adapter.addSeparatorItem(timeEntry);
       }
-      Log.d("HEY",gson.toJson(timeEntry));
+      Log.d("HEY", gson.toJson(timeEntry));
     }
 
 
   }
 
-  private TimeEntry createSeparator(Date date){
+  private TimeEntry createSeparator(Date date) {
     TimeEntry te = new TimeEntry();
     te.setType(TimeEntry.SEPARATOR);
     te.setStart(new SimpleDateFormat(timeFormat).format(date));
     return te;
   }
 
-  private List<TimeEntry> prepareList(){
+  private List<TimeEntry> prepareList() {
     List<TimeEntry> list = new ArrayList<TimeEntry>();
     TimeEntry lastSeparator = null;
     Date lastDate = null;
-    for (TimeEntry te : timeEntries){
+    for (TimeEntry te : timeEntries) {
 
-      if((lastDate != null)){
-        if(te.getStart().before(lastDate)){
+      if ((lastDate != null)) {
+        if (te.getStart().before(lastDate)) {
           lastSeparator = createSeparator(te.getStart());
           list.add(lastSeparator);
           lastDate = te.getStart();
@@ -245,7 +262,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
         list.add(lastSeparator);
         lastDate = te.getStart();
       }
-      lastSeparator.setDuration(lastSeparator.getDuration()+te.getDuration());
+      lastSeparator.setDuration(lastSeparator.getDuration() + te.getDuration());
       list.add(te);
     }
     return list;
