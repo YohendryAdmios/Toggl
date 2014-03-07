@@ -8,5 +8,7 @@
     <string name="billiable">Billiable</string>
     <string name="no_billiable">No Billiable</string>
     <string name="loading">Loading data</string>
+    <string name="description">description</string>
+    <string name="time">time</string>
 
 </resources>
