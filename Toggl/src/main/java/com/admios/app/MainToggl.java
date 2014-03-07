@@ -1,5 +1,7 @@
 package com.admios.app;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.admios.app.util.TimeEntryAdapter;
@@ -25,10 +28,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
+import com.squareup.timessquare.CalendarPickerView;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -51,12 +56,17 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private TogglService service;
   private List<TimeEntry> timeEntries;
   private String timeFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
-  private String appDateFormat = "yyyy-MM-dd";
+  private String appDateFormat = "MM-dd-yyyy";
 
   private SimpleDateFormat appDateSimpleFormater;
   private SimpleDateFormat serverDateSimpleFormater;
   private View mMainContainer;
   private View mLoadingView;
+  private EditText mDateEntryEditText;
+  private CalendarPickerView dialogView;
+  private AlertDialog theDialog;
+  private Calendar startDate;
+  private Calendar endDate;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +84,78 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
     serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
+
+    //edit Time Entry
+
+    startDate = Calendar.getInstance();
+    startDate.set(Calendar.DAY_OF_MONTH, 1);
+
+    endDate = Calendar.getInstance();
+    endDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+    mDateEntryEditText = (EditText) findViewById(R.id.dateEditText);
+    setDateEntryListeners();
+
   }
 
-  private void refresh(){
+  private void setDateEntryListeners() {
+    mDateEntryEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+      @Override
+      public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+          showCalendarDialog();
+        }
+      }
+    });
+
+    mDateEntryEditText.setOnClickListener(new View.OnClickListener() {
+
+      @Override
+      public void onClick(View v) {
+        showCalendarDialog();
+      }
+    });
+  }
+
+  private void showCalendarDialog() {
+    if (dialogView == null) {
+      dialogView = (CalendarPickerView) getLayoutInflater().inflate(R.layout.calendar_dialog, null, false);
+      dialogView.init(startDate.getTime(), endDate.getTime()) //
+              .withSelectedDate(new Date());
+    }
+    if (theDialog == null) {
+      theDialog =
+              new AlertDialog.Builder(MainToggl.this).setTitle("I'm a dialog!")
+                      .setView(dialogView)
+                      .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                          dialogInterface.dismiss();
+                        }
+                      })
+                      .setPositiveButton("Select", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                          mDateEntryEditText.setText(appDateSimpleFormater.format(dialogView.getSelectedDate()));
+                          dialogInterface.dismiss();
+                        }
+                      })
+                      .create();
+      theDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        @Override
+        public void onShow(DialogInterface dialogInterface) {
+          Log.d("HEY", "onShow: fix the dimens!");
+          dialogView.fixDialogDimens();
+        }
+      });
+    }
+    if (!theDialog.isShowing()) {
+      theDialog.show();
+    }
+
+  }
+
+  private void refresh() {
     new LoadImageTask().execute();
   }
 
@@ -102,11 +181,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void loadTimeEntries() {
-    //call the service
-    //mock dates 08/01/2013 and 08/30/2013
 
-    String start = serverDateSimpleFormater.format(new Date(1375333200000L));
-    String end = serverDateSimpleFormater.format(new Date(1377838800000L));
+    String start = serverDateSimpleFormater.format(startDate.getTime());
+    String end = serverDateSimpleFormater.format(new Date());
     start = format(start);
     end = format(end);
 
@@ -171,55 +248,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     return false;
   }
 
-  private class LoadImageTask extends AsyncTask<Void, Void, Drawable> {
-    @Override
-    protected void onPreExecute() {
-      showLoading(true);
-      super.onPreExecute();
-    }
-
-    @Override
-    protected Drawable doInBackground(Void... voids) {
-
-      try {
-        Bitmap bm = Picasso.with(getApplicationContext())
-                .load(user.getData().getImageUrl())
-                .placeholder(R.drawable.ic_action_search)
-                .error(R.drawable.abc_ic_clear)
-                .get();
-        Drawable d = new BitmapDrawable(getResources(), bm);
-        loadTimeEntries();
-        return d;
-      } catch (IOException e) {
-        Log.e("HEY", e.getMessage());
-        e.printStackTrace();
-      }
-      return null;
-    }
-
-    @Override
-    protected void onPostExecute(Drawable drawable) {
-      showLoading(false);
-      if (drawable != null) {
-        changeProfileData(drawable);
-      }
-      printListView();
-    }
-
-    @Override
-    protected void onCancelled() {
-      showLoading(false);
-      super.onCancelled();
-    }
-
-    @Override
-    protected void onCancelled(Drawable drawable) {
-      showLoading(false);
-      super.onCancelled(drawable);
-    }
-
-  }
-
   private void printListView() {
     TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item);
     ListView lv = (ListView) findViewById(R.id.entriesList);
@@ -271,6 +299,55 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void changeProfileData(Drawable drawable) {
     mi.setIcon(drawable);
     mi.setTitle(user.getData().getFullname());
+  }
+
+  private class LoadImageTask extends AsyncTask<Void, Void, Drawable> {
+    @Override
+    protected void onPreExecute() {
+      showLoading(true);
+      super.onPreExecute();
+    }
+
+    @Override
+    protected Drawable doInBackground(Void... voids) {
+
+      try {
+        Bitmap bm = Picasso.with(getApplicationContext())
+                .load(user.getData().getImageUrl())
+                .placeholder(R.drawable.ic_action_search)
+                .error(R.drawable.abc_ic_clear)
+                .get();
+        Drawable d = new BitmapDrawable(getResources(), bm);
+        loadTimeEntries();
+        return d;
+      } catch (IOException e) {
+        Log.e("HEY", e.getMessage());
+        e.printStackTrace();
+      }
+      return null;
+    }
+
+    @Override
+    protected void onPostExecute(Drawable drawable) {
+      showLoading(false);
+      if (drawable != null) {
+        changeProfileData(drawable);
+      }
+      printListView();
+    }
+
+    @Override
+    protected void onCancelled() {
+      showLoading(false);
+      super.onCancelled();
+    }
+
+    @Override
+    protected void onCancelled(Drawable drawable) {
+      showLoading(false);
+      super.onCancelled(drawable);
+    }
+
   }
 
   private class TimeEntryComparator implements Comparator<TimeEntry> {
