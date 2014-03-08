@@ -7,6 +7,7 @@ public class Project {
   private int id;
   private String name;
   private boolean billable;
+  private String clientName;
 
   public int getId() {
     return id;
@@ -30,5 +31,18 @@ public class Project {
 
   public void setBillable(boolean billable) {
     this.billable = billable;
+  }
+
+  public void setClientName(String clientName) {
+    this.clientName = clientName;
+  }
+
+  public String getClientName() {
+    return clientName;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s - %s",this.getClientName(),this.getName());
   }
 }

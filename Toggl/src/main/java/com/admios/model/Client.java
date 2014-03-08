@@ -28,40 +28,16 @@ public class Client {
     this.name = name;
   }
 
-  public boolean add(Project object) {
-    return projects.add(object);
+  public void setProjects(List<Project> projects) {
+    this.projects = projects;
   }
 
-  public boolean addAll(Collection<? extends Project> collection) {
-    return projects.addAll(collection);
-  }
-
-  public void clear() {
-    projects.clear();
-  }
-
-  public boolean contains(Object object) {
-    return projects.contains(object);
+  public List<Project> getProjects() {
+    return projects;
   }
 
   @Override
-  public boolean equals(Object object) {
-    return projects.equals(object);
-  }
-
-  public Project get(int location) {
-    return projects.get(location);
-  }
-
-  public boolean isEmpty() {
-    return projects.isEmpty();
-  }
-
-  public Iterator<Project> iterator() {
-    return projects.iterator();
-  }
-
-  public Project remove(int location) {
-    return projects.remove(location);
+  public String toString() {
+    return this.getName();
   }
 }

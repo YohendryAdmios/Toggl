@@ -1,6 +1,7 @@
 package com.admios.network;
 
 import com.admios.model.Client;
+import com.admios.model.Project;
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
 
@@ -9,6 +10,8 @@ import java.util.List;
 
 import retrofit.http.DELETE;
 import retrofit.http.GET;
+import retrofit.http.PATCH;
+import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**
@@ -23,5 +26,8 @@ public interface TogglService {
 
   @GET("/clients")
   List<Client> getClients();
+
+  @GET("/clients/{client_id}/projects")
+  List<Project> getProjectsByClient(@Path("client_id") int clientId);
 
 }

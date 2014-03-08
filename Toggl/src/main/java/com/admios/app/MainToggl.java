@@ -17,9 +17,14 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.admios.app.util.ProjectAdapter;
 import com.admios.app.util.TimeEntryAdapter;
+import com.admios.model.Client;
+import com.admios.model.Project;
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
 import com.admios.network.ApiTokenInterceptor;
@@ -32,7 +37,6 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 import com.squareup.timessquare.CalendarPickerView;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -74,6 +78,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private TimePicker tp;
   private EditText mEndedEntryEdit;
   private EditText mStartedEntryEdit;
+  private List<Client> clients;
+  private Spinner mProjectList;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +93,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     loadUser();
     changeTitle();
     buildApiAdapter();
-    refresh();
+
 
     appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
     serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
@@ -109,7 +115,10 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mEndedEntryEdit = (EditText) findViewById(R.id.endedEditText);
     setTimeEditListeners(mEndedEntryEdit);
 
+    mProjectList = (Spinner)findViewById(R.id.projects_list);
 
+
+    refresh();
   }
 
   private void setDateEntryListeners() {
@@ -226,7 +235,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void refresh() {
-    new LoadImageTask().execute();
+    new LoadInitialDataTask().execute();
   }
 
   private void showLoading(boolean show) {
@@ -336,6 +345,17 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   }
 
+  private void addProjectsToSpinner(){
+    List<Project> projects = new ArrayList<Project>();
+    for(Client client : clients){
+      for(Project project : client.getProjects()){
+        project.setClientName(client.getName());
+        projects.add(project);
+      }
+    }
+    mProjectList.setAdapter(new ProjectAdapter(this,R.layout.project_item,projects));
+  }
+
   private TimeEntry createSeparator(Date date) {
     TimeEntry te = new TimeEntry();
     te.setType(TimeEntry.SEPARATOR);
@@ -371,7 +391,41 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mi.setTitle(user.getData().getFullname());
   }
 
-  private class LoadImageTask extends AsyncTask<Void, Void, Drawable> {
+  private void loadClients() {
+    clients = service.getClients();
+    List<Client> toRemove = new ArrayList<Client>();
+    for (Client client : clients) {
+      client.setProjects(service.getProjectsByClient(client.getId()));
+      if(client.getProjects().isEmpty()){
+       toRemove.add(client);
+      }
+    }
+
+    for (Client client : toRemove){
+      clients.remove(client);
+    }
+
+    for (Client client : clients){
+      Log.d("HEY",gson.toJson(client));
+    }
+  }
+
+  private Drawable loadProfile() {
+    try {
+      Bitmap bm = Picasso.with(getApplicationContext())
+              .load(user.getData().getImageUrl())
+              .placeholder(R.drawable.ic_action_search)
+              .error(R.drawable.abc_ic_clear)
+              .get();
+      Drawable d = new BitmapDrawable(getResources(), bm);
+      return d;
+    } catch (Exception e) {
+      Toast.makeText(getApplicationContext(), "Error loading profile data", Toast.LENGTH_LONG);
+    }
+    return null;
+  }
+
+  private class LoadInitialDataTask extends AsyncTask<Void, Void, Drawable> {
     @Override
     protected void onPreExecute() {
       showLoading(true);
@@ -381,20 +435,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     @Override
     protected Drawable doInBackground(Void... voids) {
 
-      try {
-        Bitmap bm = Picasso.with(getApplicationContext())
-                .load(user.getData().getImageUrl())
-                .placeholder(R.drawable.ic_action_search)
-                .error(R.drawable.abc_ic_clear)
-                .get();
-        Drawable d = new BitmapDrawable(getResources(), bm);
-        loadTimeEntries();
-        return d;
-      } catch (IOException e) {
-        Log.e("HEY", e.getMessage());
-        e.printStackTrace();
-      }
-      return null;
+      loadTimeEntries();
+      loadClients();
+      return loadProfile();
     }
 
     @Override
@@ -404,6 +447,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
         changeProfileData(drawable);
       }
       printListView();
+      addProjectsToSpinner();
     }
 
     @Override

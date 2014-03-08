@@ -119,6 +119,12 @@
             android:background="@color/lgray"
            >
 
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/projects_list"
+                android:spinnerMode="dialog"/>
+
             <RelativeLayout
                 android:layout_width="fill_parent"
                 android:layout_height="40dp"
@@ -237,6 +243,7 @@
                     android:textOn=""/>
 
             </RelativeLayout>
+
         </LinearLayout>
 
 
