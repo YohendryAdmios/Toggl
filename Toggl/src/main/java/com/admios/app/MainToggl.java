@@ -156,7 +156,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     timeDialogView = (FrameLayout) getLayoutInflater().inflate(R.layout.time_dialog, null, false);
 
     timeDialog =
-            new AlertDialog.Builder(MainToggl.this).setTitle("I'm a dialog!")
+            new AlertDialog.Builder(MainToggl.this).setTitle("Select Hour")
                     .setView(timeDialogView)
                     .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                       @Override
@@ -196,7 +196,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     }
     if (theDialog == null) {
       theDialog =
-              new AlertDialog.Builder(MainToggl.this).setTitle("I'm a dialog!")
+              new AlertDialog.Builder(MainToggl.this).setTitle("Select Date")
                       .setView(dialogView)
                       .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                         @Override
