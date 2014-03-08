@@ -1,5 +1,6 @@
 package com.admios.network;
 
+import com.admios.model.Client;
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
 
@@ -19,5 +20,8 @@ public interface TogglService {
 
   @GET("/time_entries")
   List<TimeEntry> timeEntries(@Query("start_date") String start,@Query("end_date") String end);
+
+  @GET("/clients")
+  List<Client> getClients();
 
 }
