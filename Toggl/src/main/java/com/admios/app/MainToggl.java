@@ -15,7 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TimePicker;
 
 import com.admios.app.util.TimeEntryAdapter;
 import com.admios.model.TimeEntry;
@@ -64,9 +66,14 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private View mLoadingView;
   private EditText mDateEntryEditText;
   private CalendarPickerView dialogView;
+  private FrameLayout timeDialogView;
   private AlertDialog theDialog;
+  private AlertDialog timeDialog;
   private Calendar startDate;
   private Calendar endDate;
+  private TimePicker tp;
+  private EditText mEndedEntryEdit;
+  private EditText mStartedEntryEdit;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +103,13 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mDateEntryEditText = (EditText) findViewById(R.id.dateEditText);
     setDateEntryListeners();
 
+    mStartedEntryEdit = (EditText) findViewById(R.id.startedEditText);
+    setTimeEditListeners(mStartedEntryEdit);
+
+    mEndedEntryEdit = (EditText) findViewById(R.id.endedEditText);
+    setTimeEditListeners(mEndedEntryEdit);
+
+
   }
 
   private void setDateEntryListeners() {
@@ -115,6 +129,63 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
         showCalendarDialog();
       }
     });
+  }
+
+
+  private void setTimeEditListeners(final EditText textField) {
+    textField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+      @Override
+      public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+          showTimeDialog(textField);
+        }
+      }
+    });
+
+    textField.setOnClickListener(new View.OnClickListener() {
+
+      @Override
+      public void onClick(View v) {
+        showTimeDialog(textField);
+      }
+    });
+  }
+
+  private void showTimeDialog(final EditText textField) {
+
+    timeDialogView = (FrameLayout) getLayoutInflater().inflate(R.layout.time_dialog, null, false);
+
+    timeDialog =
+            new AlertDialog.Builder(MainToggl.this).setTitle("I'm a dialog!")
+                    .setView(timeDialogView)
+                    .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                      }
+                    })
+                    .setPositiveButton("Select", new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialogInterface, int i) {
+                        tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
+                        textField.setText(String.format("%02d:%02d %s", getSelectedHour(), tp.getCurrentMinute(), getSelectedHourLapse()));
+                        dialogInterface.dismiss();
+                      }
+                    })
+                    .create();
+
+
+    if (!timeDialog.isShowing()) {
+      timeDialog.show();
+    }
+  }
+
+  private int getSelectedHour() {
+    return tp.getCurrentHour() > 12 ? tp.getCurrentHour() - 12 : tp.getCurrentHour();
+  }
+
+  private String getSelectedHourLapse() {
+    return tp.getCurrentHour() > 12 ? "PM " : "AM";
   }
 
   private void showCalendarDialog() {
@@ -152,7 +223,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     if (!theDialog.isShowing()) {
       theDialog.show();
     }
-
   }
 
   private void refresh() {
