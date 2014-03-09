@@ -14,6 +14,10 @@
                  android:title="@string/log_out"></item>
            <item android:id="@+id/action_refresh"
                  android:title="@string/refresh"></item>
+           <item android:id="@+id/action_main"
+                 android:title="@string/main"></item>
+           <item android:id="@+id/action_edit"
+                 android:title="@string/shoe_edit"></item>
        </menu>
     </item>
 

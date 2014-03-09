@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -37,6 +38,7 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 import com.squareup.timessquare.CalendarPickerView;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -80,6 +82,10 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private EditText mStartedEntryEdit;
   private List<Client> clients;
   private Spinner mProjectList;
+  private View mEditContainer;
+  private Button mNewTimeEntryButton;
+  private TimeEntry currentTimeEntry;
+  private SimpleDateFormat timeFormater;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +93,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     setContentView(R.layout.activity_main_toggl);
     mMainContainer = findViewById(R.id.container);
     mLoadingView = findViewById(R.id.loading_status);
-
+    mEditContainer = findViewById(R.id.edit_container);
 
     hideKeyboard();
     loadUser();
@@ -97,6 +103,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
     serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
+    timeFormater = new SimpleDateFormat("hh:mm a");
 
     //edit Time Entry
 
@@ -115,7 +122,15 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mEndedEntryEdit = (EditText) findViewById(R.id.endedEditText);
     setTimeEditListeners(mEndedEntryEdit);
 
-    mProjectList = (Spinner)findViewById(R.id.projects_list);
+    mProjectList = (Spinner) findViewById(R.id.projects_list);
+
+    mNewTimeEntryButton = (Button) findViewById(R.id.new_task_button);
+    mNewTimeEntryButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        newTimeEntry(v);
+      }
+    });
 
 
     refresh();
@@ -132,7 +147,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     });
 
     mDateEntryEditText.setOnClickListener(new View.OnClickListener() {
-
       @Override
       public void onClick(View v) {
         showCalendarDialog();
@@ -152,7 +166,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     });
 
     textField.setOnClickListener(new View.OnClickListener() {
-
       @Override
       public void onClick(View v) {
         showTimeDialog(textField);
@@ -177,7 +190,10 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                       @Override
                       public void onClick(DialogInterface dialogInterface, int i) {
                         tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
-                        textField.setText(String.format("%02d:%02d %s", getSelectedHour(), tp.getCurrentMinute(), getSelectedHourLapse()));
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.HOUR,tp.getCurrentHour());
+                        calendar.set(Calendar.MINUTE,tp.getCurrentMinute());
+                        textField.setText(timeFormater.format(calendar.getTime()));
                         dialogInterface.dismiss();
                       }
                     })
@@ -200,7 +216,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void showCalendarDialog() {
     if (dialogView == null) {
       dialogView = (CalendarPickerView) getLayoutInflater().inflate(R.layout.calendar_dialog, null, false);
-      dialogView.init(startDate.getTime(), endDate.getTime()) //
+      dialogView.init(startDate.getTime(), endDate.getTime())
               .withSelectedDate(new Date());
     }
     if (theDialog == null) {
@@ -224,7 +240,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       theDialog.setOnShowListener(new DialogInterface.OnShowListener() {
         @Override
         public void onShow(DialogInterface dialogInterface) {
-          Log.d("HEY", "onShow: fix the dimens!");
           dialogView.fixDialogDimens();
         }
       });
@@ -241,6 +256,22 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void showLoading(boolean show) {
     mLoadingView.setVisibility(show ? View.VISIBLE : View.GONE);
     mMainContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+    mEditContainer.setVisibility(View.GONE);
+  }
+
+  private void showEdit(boolean show) {
+    if (show) {
+      loadTimeEntry();
+    }
+    mEditContainer.setVisibility(show ? View.VISIBLE : View.GONE);
+    mMainContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+    mLoadingView.setVisibility(View.GONE);
+  }
+
+  private void loadTimeEntry() {
+    mStartedEntryEdit.setText(timeFormater.format(currentTimeEntry.getStart()));
+    mEndedEntryEdit.setText(timeFormater.format(currentTimeEntry.getStop()));
+    mDateEntryEditText.setText(appDateSimpleFormater.format(currentTimeEntry.getAt()));
   }
 
   private void buildApiAdapter() {
@@ -268,11 +299,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     timeEntries = service.timeEntries(start, end);
     Collections.sort(timeEntries, new TimeEntryComparator());
-
-    for (TimeEntry timeEntry : timeEntries) {
-      Log.d("HEY", gson.toJson(timeEntry));
-    }
-
   }
 
   private String format(String date) {
@@ -297,9 +323,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.main_toggl, menu);
-
     mi = (MenuItem) menu.findItem(R.id.action_profile);
-
     return super.onCreateOptionsMenu(menu);
   }
 
@@ -311,6 +335,12 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
         return true;
       case R.id.action_log_out:
         logOut();
+        return true;
+      case R.id.action_main:
+        showEdit(false);
+        return true;
+      case R.id.action_edit:
+        showEdit(true);
         return true;
       default:
         return super.onOptionsItemSelected(item);
@@ -328,6 +358,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void printListView() {
+    showEdit(false);
     TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item);
     ListView lv = (ListView) findViewById(R.id.entriesList);
     lv.setAdapter(adapter);
@@ -339,21 +370,20 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       } else {
         adapter.addSeparatorItem(timeEntry);
       }
-      Log.d("HEY", gson.toJson(timeEntry));
     }
-
+    adapter.notifyDataSetChanged();
 
   }
 
-  private void addProjectsToSpinner(){
+  private void addProjectsToSpinner() {
     List<Project> projects = new ArrayList<Project>();
-    for(Client client : clients){
-      for(Project project : client.getProjects()){
+    for (Client client : clients) {
+      for (Project project : client.getProjects()) {
         project.setClientName(client.getName());
         projects.add(project);
       }
     }
-    mProjectList.setAdapter(new ProjectAdapter(this,R.layout.project_item,projects));
+    mProjectList.setAdapter(new ProjectAdapter(this, R.layout.project_item, projects));
   }
 
   private TimeEntry createSeparator(Date date) {
@@ -396,17 +426,13 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     List<Client> toRemove = new ArrayList<Client>();
     for (Client client : clients) {
       client.setProjects(service.getProjectsByClient(client.getId()));
-      if(client.getProjects().isEmpty()){
-       toRemove.add(client);
+      if (client.getProjects().isEmpty()) {
+        toRemove.add(client);
       }
     }
 
-    for (Client client : toRemove){
+    for (Client client : toRemove) {
       clients.remove(client);
-    }
-
-    for (Client client : clients){
-      Log.d("HEY",gson.toJson(client));
     }
   }
 
@@ -420,9 +446,24 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       Drawable d = new BitmapDrawable(getResources(), bm);
       return d;
     } catch (Exception e) {
-      Toast.makeText(getApplicationContext(), "Error loading profile data", Toast.LENGTH_LONG);
+      Toast.makeText(getApplicationContext(), "Error loading profile data", Toast.LENGTH_LONG).show();
     }
     return null;
+  }
+
+  public void newTimeEntry(View v) {
+    createNewTimeEntry();
+    showEdit(true);
+  }
+
+  public void createNewTimeEntry() {
+    currentTimeEntry = new TimeEntry();
+    Date now = new Date();
+
+    currentTimeEntry.setStart(serverDateSimpleFormater.format(now));
+    currentTimeEntry.setStop(serverDateSimpleFormater.format(now));
+    currentTimeEntry.setAt(serverDateSimpleFormater.format(now));
+    Log.d("HEY", gson.toJson(currentTimeEntry));
   }
 
   private class LoadInitialDataTask extends AsyncTask<Void, Void, Drawable> {
@@ -434,7 +475,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     @Override
     protected Drawable doInBackground(Void... voids) {
-
       loadTimeEntries();
       loadClients();
       return loadProfile();
@@ -442,30 +482,16 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     @Override
     protected void onPostExecute(Drawable drawable) {
-      showLoading(false);
       if (drawable != null) {
         changeProfileData(drawable);
       }
-      printListView();
       addProjectsToSpinner();
-    }
-
-    @Override
-    protected void onCancelled() {
       showLoading(false);
-      super.onCancelled();
+      printListView();
     }
-
-    @Override
-    protected void onCancelled(Drawable drawable) {
-      showLoading(false);
-      super.onCancelled(drawable);
-    }
-
   }
 
   private class TimeEntryComparator implements Comparator<TimeEntry> {
-
     @Override
     public int compare(TimeEntry lhs, TimeEntry rhs) {
       return rhs.getStart().compareTo(lhs.getStart());

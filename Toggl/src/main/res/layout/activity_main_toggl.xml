@@ -35,33 +35,34 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        tools:context="com.admios.app.MainToggl"
-        tools:ignore="MergeRootFrame">
+        tools:context="com.admios.app.MainToggl">
 
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal|top"
-            android:layout_margin="10dp"
-            android:background="@drawable/form">
-        </RelativeLayout>
 
         <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/entriesList"
             android:layout_gravity="center"
             android:layout_marginTop="85dp"
             android:padding="5dp"
             android:layout_marginBottom="25dp"
             />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="100dp"
+            android:text="New Task"
+            android:id="@+id/new_task_button"
+            android:layout_gravity="center_horizontal|top"
+            android:background="@drawable/bbuton_success"
+            android:layout_margin="5dp"
+            android:textSize="40dp"/>
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/edit_container"
         android:layout_width="fill_parent"
+        android:visibility="gone"
         android:layout_height="fill_parent"
         tools:context="com.admios.app.MainToggl"
         android:background="@color/lgray">
@@ -123,7 +124,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/projects_list"
-                android:spinnerMode="dialog"/>
+                />
 
             <RelativeLayout
                 android:layout_width="fill_parent"

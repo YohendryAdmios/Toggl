@@ -9,5 +9,7 @@
     <string name="ended">Ended</string>
     <string name="date">Date</string>
     <string name="billable">Billable</string>
+    <string name="main">Back to main</string>
+    <string name="shoe_edit">Show edit</string>
 
 </resources>

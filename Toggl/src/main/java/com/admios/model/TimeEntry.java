@@ -63,7 +63,7 @@ public class TimeEntry {
   }
 
   public Date getStart() {
-    return getShortDate(this.start);
+    return getFullDate(this.start);
   }
 
   public void setStart(String start) {
@@ -71,7 +71,7 @@ public class TimeEntry {
   }
 
   public Date getStop() {
-    return getShortDate(this.stop);
+    return getFullDate(this.stop);
   }
 
   public void setStop(String stop) {
@@ -95,7 +95,7 @@ public class TimeEntry {
   }
 
   public Date getAt() {
-    return getShortDate(this.at);
+    return getFullDate(this.at);
   }
 
   private Date getShortDate(String at) {
