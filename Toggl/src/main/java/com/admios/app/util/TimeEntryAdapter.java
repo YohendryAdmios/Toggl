@@ -24,9 +24,7 @@ import java.util.TreeSet;
  */
 public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   private Context context;
-  private int layoutResourceId;
   List<TimeEntry> timeEntries;
-  private int drawableId;
   private TimeEntry timeEntry;
   private ImageView billiableImageView;
   private TextView descripctionTextView;
@@ -44,7 +42,7 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
   public TimeEntryAdapter(Context context, int layoutResourceId) {
     super(context, layoutResourceId);
     this.context = context;
-    this.layoutResourceId = layoutResourceId;
+    int layoutResourceId1 = layoutResourceId;
     this.timeEntries = new ArrayList<TimeEntry>();
     inflater = ((Activity) context).getLayoutInflater();
   }
@@ -112,6 +110,7 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     descripctionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
     durationTextView = (TextView) convertView.findViewById(R.id.durationTextView);
 
+    int drawableId;
     drawableId = R.drawable.bill_off;
     if (timeEntry.isBilliable()) {
       drawableId = R.drawable.bill_on;
@@ -119,9 +118,8 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     Picasso.with(context).load(R.drawable.bill_on).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
 
-
     durationTextView.setText("Fecha : " +
-            this.formatDate(timeEntry.getStart()) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
+              DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
     return convertView;
   }
 
@@ -130,7 +128,7 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     // object item based on the position
     timeEntry = timeEntries.get(position);
     dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
-    dateTextView.setText(this.formatDate(timeEntry.getStart()));
+    dateTextView.setText(DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())));
     totalTextView = (TextView) convertView.findViewById(R.id.durationTextView);
     totalTextView.setText("Total : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
 

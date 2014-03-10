@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.admios.app.util.DateUtil;
 import com.admios.app.util.ProjectAdapter;
 import com.admios.app.util.TimeEntryAdapter;
 import com.admios.model.Client;
@@ -63,11 +65,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private Gson gson;
   private TogglService service;
   private List<TimeEntry> timeEntries;
-  private String timeFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
-  private String appDateFormat = "MM-dd-yyyy";
-
-  private SimpleDateFormat appDateSimpleFormater;
-  private SimpleDateFormat serverDateSimpleFormater;
   private View mMainContainer;
   private View mLoadingView;
   private EditText mDateEntryEditText;
@@ -101,9 +98,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     buildApiAdapter();
 
 
-    appDateSimpleFormater = new SimpleDateFormat(appDateFormat);
-    serverDateSimpleFormater = new SimpleDateFormat(timeFormat);
-    timeFormater = new SimpleDateFormat("hh:mm a");
+
+
 
     //edit Time Entry
 
@@ -191,10 +187,19 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                       public void onClick(DialogInterface dialogInterface, int i) {
                         tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
                         Calendar calendar = Calendar.getInstance();
-                        calendar.set(Calendar.HOUR,tp.getCurrentHour());
-                        calendar.set(Calendar.MINUTE,tp.getCurrentMinute());
-                        textField.setText(timeFormater.format(calendar.getTime()));
+                        calendar.setTime(DateUtil.parseLongDate(currentTimeEntry.getStart()));
+                        calendar.set(Calendar.HOUR, tp.getCurrentHour());
+                        calendar.set(Calendar.MINUTE, tp.getCurrentMinute());
+                        Log.d("HEY","before > "+gson.toJson(currentTimeEntry));
+                        if (textField.getId() == R.id.startedEditText) {
+                          currentTimeEntry.setStart(DateUtil.toLongDate(calendar.getTime()));
+                        } else {
+                          currentTimeEntry.setStop(DateUtil.toLongDate(calendar.getTime()));
+                        }
+                        Log.d("HEY","after > "+gson.toJson(currentTimeEntry));
+                        loadTimeEntry();
                         dialogInterface.dismiss();
+
                       }
                     })
                     .create();
@@ -205,13 +210,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     }
   }
 
-  private int getSelectedHour() {
-    return tp.getCurrentHour() > 12 ? tp.getCurrentHour() - 12 : tp.getCurrentHour();
-  }
-
-  private String getSelectedHourLapse() {
-    return tp.getCurrentHour() > 12 ? "PM " : "AM";
-  }
 
   private void showCalendarDialog() {
     if (dialogView == null) {
@@ -232,7 +230,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                       .setPositiveButton("Select", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                          mDateEntryEditText.setText(appDateSimpleFormater.format(dialogView.getSelectedDate()));
+                          mDateEntryEditText.setText(DateUtil.toShortDate(dialogView.getSelectedDate()));
                           dialogInterface.dismiss();
                         }
                       })
@@ -269,9 +267,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void loadTimeEntry() {
-    mStartedEntryEdit.setText(timeFormater.format(currentTimeEntry.getStart()));
-    mEndedEntryEdit.setText(timeFormater.format(currentTimeEntry.getStop()));
-    mDateEntryEditText.setText(appDateSimpleFormater.format(currentTimeEntry.getAt()));
+    mStartedEntryEdit.setText(DateUtil.toTimeFormat(DateUtil.parseLongDate(currentTimeEntry.getStart())));
+    mEndedEntryEdit.setText(DateUtil.toTimeFormat(DateUtil.parseLongDate(currentTimeEntry.getStop())));
+    mDateEntryEditText.setText(DateUtil.toShortDate(DateUtil.parseLongDate(currentTimeEntry.getAt())));
   }
 
   private void buildApiAdapter() {
@@ -292,8 +290,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   private void loadTimeEntries() {
 
-    String start = serverDateSimpleFormater.format(startDate.getTime());
-    String end = serverDateSimpleFormater.format(new Date());
+    String start = DateUtil.toLongDate(startDate.getTime());
+    String end = DateUtil.toLongDate(new Date());
     start = format(start);
     end = format(end);
 
@@ -389,7 +387,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private TimeEntry createSeparator(Date date) {
     TimeEntry te = new TimeEntry();
     te.setType(TimeEntry.SEPARATOR);
-    te.setStart(new SimpleDateFormat(timeFormat).format(date));
+    te.setStart(DateUtil.toLongDate(date));
     return te;
   }
 
@@ -397,18 +395,21 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     List<TimeEntry> list = new ArrayList<TimeEntry>();
     TimeEntry lastSeparator = null;
     Date lastDate = null;
+    Date actualShortDate = null;
+    Date actualLongDate = null;
     for (TimeEntry te : timeEntries) {
-
+      actualShortDate = DateUtil.parseShortDate(te.getStart());
+      actualLongDate = DateUtil.parseLongDate(te.getStart());
       if ((lastDate != null)) {
-        if (te.getStart().before(lastDate)) {
-          lastSeparator = createSeparator(te.getStart());
+        if (actualShortDate.before(lastDate)) {
+          lastSeparator = createSeparator(actualLongDate);
           list.add(lastSeparator);
-          lastDate = te.getStart();
+          lastDate = actualShortDate;
         }
       } else {
-        lastSeparator = createSeparator(te.getStart());
+        lastSeparator = createSeparator( actualLongDate);
         list.add(lastSeparator);
-        lastDate = te.getStart();
+        lastDate = actualShortDate;
       }
       lastSeparator.setDuration(lastSeparator.getDuration() + te.getDuration());
       list.add(te);
@@ -460,9 +461,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     currentTimeEntry = new TimeEntry();
     Date now = new Date();
 
-    currentTimeEntry.setStart(serverDateSimpleFormater.format(now));
-    currentTimeEntry.setStop(serverDateSimpleFormater.format(now));
-    currentTimeEntry.setAt(serverDateSimpleFormater.format(now));
+    currentTimeEntry.setStart(DateUtil.toLongDate(now));
+    currentTimeEntry.setStop(DateUtil.toLongDate(now));
+    currentTimeEntry.setAt(DateUtil.toLongDate(now));
     Log.d("HEY", gson.toJson(currentTimeEntry));
   }
 

@@ -4,12 +4,17 @@ package com.admios.model;
  * Created by yohendryhurtado on 3/5/14.
  */
 
+import com.admios.app.util.DateUtil;
+
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class TimeEntry {
   public static final int ITEM = 1;
+  private int type = ITEM;
   public static final int SEPARATOR = 2;
   private int id;
   private String guid;
@@ -17,17 +22,16 @@ public class TimeEntry {
   private boolean billiable;
   private String start;
   private String stop;
-  private int duration = 0;
+  private long duration = 0;
   private String description;
   private String at;
-  private int type = ITEM;
+
+  public int getType() {
+    return this.type;
+  }
 
   public void setType(int type) {
     this.type = type;
-  }
-
-  public int getType(){
-    return this.type;
   }
 
   public int getId() {
@@ -62,27 +66,37 @@ public class TimeEntry {
     this.billiable = billiable;
   }
 
-  public Date getStart() {
-    return getFullDate(this.start);
+  public String getStart() {
+    return this.start;
+
   }
 
   public void setStart(String start) {
     this.start = start;
   }
 
-  public Date getStop() {
-    return getFullDate(this.stop);
+  public String getStop() {
+    return this.stop;
   }
 
   public void setStop(String stop) {
     this.stop = stop;
   }
 
-  public int getDuration() {
-    return duration;
+  public long getDuration() {
+    if(this.isNew()){
+      return duration;
+    } else {
+      return calculateDuration();
+    }
+
   }
 
-  public void setDuration(int duration) {
+  private long calculateDuration() {
+      return DateUtil.getDateDiff(DateUtil.parseLongDate(getStart()), DateUtil.parseLongDate(getStop()), TimeUnit.SECONDS);
+  }
+
+  public void setDuration(long duration) {
     this.duration = duration;
   }
 
@@ -94,21 +108,8 @@ public class TimeEntry {
     this.description = description;
   }
 
-  public Date getAt() {
-    return getFullDate(this.at);
-  }
-
-  private Date getShortDate(String at) {
-    return formatDate("yyyy-MM-dd",at);
-  }
-
-  private Date formatDate(String format,String date){
-    try {
-      return new SimpleDateFormat(format).parse(date.substring(0,date.length()-6));
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return null;
+  public String getAt() {
+    return this.at;
   }
 
   public void setAt(String at) {
@@ -116,7 +117,19 @@ public class TimeEntry {
     this.at = at;
   }
 
-  private Date getFullDate(String date){
-    return formatDate("yyyy-MM-dd'T'HH:mm:ss",date);
+  private Date formatDate(String format, String date) {
+    try {
+      return new SimpleDateFormat(format).parse(date.substring(0, date.length() - 6));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public boolean isNew(){
+    if(getId() > 0){
+      return false;
+    }
+    return true;
   }
 }
