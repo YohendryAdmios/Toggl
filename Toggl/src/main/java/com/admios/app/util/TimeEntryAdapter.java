@@ -118,8 +118,10 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     Picasso.with(context).load(drawableId).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
 
-    durationTextView.setText("Fecha : " +
-              DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())) + " Duration : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
+    durationTextView.setText(String.format("Fecha : %s Duration : %s Hrs",
+            DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())),
+            DateUtil.durationToTime(timeEntry.getDuration())
+    ));
     return convertView;
   }
 
@@ -130,13 +132,10 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
     dateTextView.setText(DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())));
     totalTextView = (TextView) convertView.findViewById(R.id.durationTextView);
-    totalTextView.setText("Total : " + (timeEntry.getDuration() / 60 / 60) + "Hrs");
+    totalTextView.setText(String.format("Total %s Hrs",DateUtil.durationToTime(timeEntry.getDuration())));
 
 
     return convertView;
   }
 
-  private String formatDate(Date date) {
-    return new SimpleDateFormat("MM-dd-yyyy").format(date);
-  }
 }
