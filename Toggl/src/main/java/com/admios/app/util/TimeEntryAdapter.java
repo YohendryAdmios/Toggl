@@ -112,10 +112,10 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
 
     int drawableId;
     drawableId = R.drawable.bill_off;
-    if (timeEntry.isBilliable()) {
+    if (timeEntry.isBillable()) {
       drawableId = R.drawable.bill_on;
     }
-    Picasso.with(context).load(R.drawable.bill_on).into(billiableImageView);
+    Picasso.with(context).load(drawableId).into(billiableImageView);
     descripctionTextView.setText(timeEntry.getDescription());
 
     durationTextView.setText("Fecha : " +

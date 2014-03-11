@@ -4,6 +4,8 @@ package com.admios.model;
  * Created by yohendryhurtado on 3/5/14.
  */
 
+import android.util.Log;
+
 import com.admios.app.util.DateUtil;
 
 import java.sql.Time;
@@ -16,14 +18,14 @@ public class TimeEntry {
   public static final int ITEM = 1;
   private int type = ITEM;
   public static final int SEPARATOR = 2;
-  private int id;
+  private int id = -1;
   private String guid;
   private int pid;
-  private boolean billiable;
+  private boolean billable;
   private String start;
   private String stop;
   private long duration = 0;
-  private String description;
+  private String description = "";
   private String at;
 
   public int getType() {
@@ -58,12 +60,12 @@ public class TimeEntry {
     this.pid = pid;
   }
 
-  public boolean isBilliable() {
-    return billiable;
+  public void setBillable(boolean billable) {
+    this.billable = billable;
   }
 
-  public void setBilliable(boolean billiable) {
-    this.billiable = billiable;
+  public boolean isBillable() {
+    return billable;
   }
 
   public String getStart() {
@@ -84,16 +86,21 @@ public class TimeEntry {
   }
 
   public long getDuration() {
-    if(this.isNew()){
+    if(!this.isNew() || (this.getType() == TimeEntry.SEPARATOR)){
       return duration;
     } else {
-      return calculateDuration();
+        return calculateDuration();
     }
 
   }
 
   private long calculateDuration() {
-      return DateUtil.getDateDiff(DateUtil.parseLongDate(getStart()), DateUtil.parseLongDate(getStop()), TimeUnit.SECONDS);
+
+    Log.d("TimeEntry",String.format("%s and %s",getStart(),getStop()));
+    Date start = DateUtil.parseLongDate(getStart());
+    Date end =  DateUtil.parseLongDate(getStop());
+
+    return DateUtil.getDateDiff(start, end, TimeUnit.SECONDS);
   }
 
   public void setDuration(long duration) {

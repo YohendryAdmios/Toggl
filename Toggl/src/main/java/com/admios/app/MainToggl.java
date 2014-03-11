@@ -9,12 +9,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.admios.app.util.DateUtil;
 import com.admios.app.util.ProjectAdapter;
@@ -48,6 +49,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
@@ -83,6 +85,12 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private Button mNewTimeEntryButton;
   private TimeEntry currentTimeEntry;
   private SimpleDateFormat timeFormater;
+  private EditText mDurationEdit;
+  private Button mEditCancelButton;
+  private Button mEditDeleteButton;
+  private ListView lv;
+  private EditText mEditDescriptionEditText;
+  private ToggleButton mEditBillableButton;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +105,21 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     changeTitle();
     buildApiAdapter();
 
+    lv = (ListView) findViewById(R.id.entriesList);
+    lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+        TimeEntry tmp = (TimeEntry) parent.getItemAtPosition(position);
+        if(tmp.getType() == TimeEntry.ITEM){
+          currentTimeEntry = tmp;
+          loadTimeEntry();
+          showEdit(true);
+          Log.d("CURRENT",gson.toJson(currentTimeEntry));
+        }
+
+      }
+    });
 
 
 
@@ -128,6 +150,21 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       }
     });
 
+    mDurationEdit = (EditText) findViewById(R.id.timeEditText);
+
+    mEditCancelButton = (Button) findViewById(R.id.cancelButton);
+    mEditCancelButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        showEdit(false);
+      }
+    });
+
+    mEditDeleteButton = (Button) findViewById(R.id.deleteButton);
+
+    mEditDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
+
+    mEditBillableButton = (ToggleButton) findViewById(R.id.toggleButton);
 
     refresh();
   }
@@ -188,7 +225,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                         tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
                         Calendar calendar = Calendar.getInstance();
                         calendar.setTime(DateUtil.parseLongDate(currentTimeEntry.getStart()));
-                        calendar.set(Calendar.HOUR, tp.getCurrentHour());
+                        calendar.set(Calendar.HOUR_OF_DAY, tp.getCurrentHour());
                         calendar.set(Calendar.MINUTE, tp.getCurrentMinute());
                         Log.d("HEY","before > "+gson.toJson(currentTimeEntry));
                         if (textField.getId() == R.id.startedEditText) {
@@ -267,9 +304,14 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void loadTimeEntry() {
+    mEditDescriptionEditText.setText(currentTimeEntry.getDescription());
+    mEditDeleteButton.setVisibility((currentTimeEntry.getId() > 1) ? View.VISIBLE:View.GONE);
     mStartedEntryEdit.setText(DateUtil.toTimeFormat(DateUtil.parseLongDate(currentTimeEntry.getStart())));
     mEndedEntryEdit.setText(DateUtil.toTimeFormat(DateUtil.parseLongDate(currentTimeEntry.getStop())));
     mDateEntryEditText.setText(DateUtil.toShortDate(DateUtil.parseLongDate(currentTimeEntry.getAt())));
+    mDurationEdit.setText(DateUtil.durationToTime(currentTimeEntry.getDuration()));
+    mEditBillableButton.setChecked(currentTimeEntry.isBillable());
+
   }
 
   private void buildApiAdapter() {
@@ -358,7 +400,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void printListView() {
     showEdit(false);
     TimeEntryAdapter adapter = new TimeEntryAdapter(this, R.layout.time_entry_item);
-    ListView lv = (ListView) findViewById(R.id.entriesList);
+
     lv.setAdapter(adapter);
 
     List<TimeEntry> list = prepareList();
@@ -464,7 +506,19 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     currentTimeEntry.setStart(DateUtil.toLongDate(now));
     currentTimeEntry.setStop(DateUtil.toLongDate(now));
     currentTimeEntry.setAt(DateUtil.toLongDate(now));
-    Log.d("HEY", gson.toJson(currentTimeEntry));
+    Log.d("HEY", String.format("new TimeEntry %s", gson.toJson(currentTimeEntry)));
+  }
+
+  @Override
+  public void onBackPressed() {
+    if(mEditContainer.getVisibility() == View.VISIBLE){
+      showEdit(false);
+    } else if(mLoadingView.getVisibility() == View.VISIBLE){
+      showLoading(false);
+    } else if(mMainContainer.getVisibility() == View.VISIBLE){
+      super.onBackPressed();
+    }
+
   }
 
   private class LoadInitialDataTask extends AsyncTask<Void, Void, Drawable> {

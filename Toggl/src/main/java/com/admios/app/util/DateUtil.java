@@ -15,9 +15,11 @@ public class DateUtil {
   private static String longFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
   private static String shortFormat = "MM-dd-yyyy";
   private static String timeFormat = "hh:mm a";
+  private static String durationFormat = "HH:mm";
   private static SimpleDateFormat shortFormatter = new SimpleDateFormat(shortFormat);
   private static SimpleDateFormat longFormatter = new SimpleDateFormat(longFormat);
   private static SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
+  private static SimpleDateFormat durationFormatter = new SimpleDateFormat(durationFormat);
   /**
    * Get a diff between two dates
    * @param date1 the oldest date
@@ -27,6 +29,7 @@ public class DateUtil {
    */
   public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
     long diffInMillies = date2.getTime() - date1.getTime();
+    Log.d("DateUtil",String.format("diff betwin %s and %s is %d",DateUtil.toLongDate(date1),DateUtil.toLongDate(date2),diffInMillies));
     return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
   }
 
@@ -38,6 +41,10 @@ public class DateUtil {
     return longFormatter.format(date);
   }
 
+  public  static String toDuration(Date date) {
+    return durationFormatter.format(date);
+  }
+
   public static String toTimeFormat(Date date){
     return timeFormatter.format(date);
   }
@@ -46,7 +53,7 @@ public class DateUtil {
     try {
       return longFormatter.parse(date);
     } catch (ParseException e) {
-      Log.e("DateUtil", String.format("error traying to parse %s", date));
+      Log.e("DateUtil", String.format("error trayng to parse %s", date));
       e.printStackTrace();
     }
     return new Date(0);
@@ -61,6 +68,14 @@ public class DateUtil {
 
     }
     return new Date(0);
+  }
+
+  public static String durationToTime(long duration){
+    duration = Math.abs(duration);
+    long hours = duration / 3600;
+    long minutes = (duration % 3600) / 60;
+    return String.format("%02d:%02d",hours,minutes);
+
   }
 
 
