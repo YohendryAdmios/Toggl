@@ -1,15 +1,9 @@
 package com.admios.model;
 
-import android.util.Log;
-
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /**
  * Created by yohendryhurtado on 3/3/14.
  */
-public class User{
+public class User {
 
   private String since;
   private Data data;

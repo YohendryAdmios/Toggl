@@ -1,7 +1,6 @@
 package com.admios.network;
 
 import com.admios.exception.ForbiddenException;
-import com.admios.exception.UnauthorizedException;
 
 import retrofit.ErrorHandler;
 import retrofit.RetrofitError;
@@ -12,7 +11,7 @@ import retrofit.client.Response;
  */
 public class NetworkErrorHandler implements ErrorHandler {
   @Override
-  public Throwable handleError(RetrofitError cause){
+  public Throwable handleError(RetrofitError cause) {
     Response r = cause.getResponse();
     if (r != null && r.getStatus() == 403) {
       return new ForbiddenException(cause);

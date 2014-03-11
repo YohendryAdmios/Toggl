@@ -43,6 +43,6 @@ public class Project {
 
   @Override
   public String toString() {
-    return String.format("%s - %s",this.getClientName(),this.getName());
+    return String.format("%s - %s", this.getClientName(), this.getName());
   }
 }

@@ -6,16 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.admios.app.R;
-import com.admios.model.Client;
 import com.admios.model.Project;
-import com.admios.model.TimeEntry;
-import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +23,7 @@ public class ProjectAdapter extends ArrayAdapter<Project> {
   private final LayoutInflater inflater;
 
   public ProjectAdapter(Context context, int resource, List<Project> objects) {
-    super(context, resource,R.id.projectName, objects);
+    super(context, resource, R.id.projectName, objects);
     this.context = context;
     this.layoutResourceId = resource;
     this.projects = objects;
@@ -48,8 +43,8 @@ public class ProjectAdapter extends ArrayAdapter<Project> {
   private View createItem(int position, View convertView, ViewGroup parent) {
     convertView = inflater.inflate(R.layout.project_item, parent, false);
     Project project = projects.get(position);
-    ((TextView)convertView.findViewById(R.id.projectName)).setText(project.getName());
-    ((TextView)convertView.findViewById(R.id.clientName)).setText(project.getClientName());
+    ((TextView) convertView.findViewById(R.id.projectName)).setText(project.getName());
+    ((TextView) convertView.findViewById(R.id.clientName)).setText(project.getClientName());
     return convertView;
   }
 }

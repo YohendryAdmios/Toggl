@@ -20,36 +20,38 @@ public class DateUtil {
   private static SimpleDateFormat longFormatter = new SimpleDateFormat(longFormat);
   private static SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
   private static SimpleDateFormat durationFormatter = new SimpleDateFormat(durationFormat);
+
   /**
    * Get a diff between two dates
-   * @param date1 the oldest date
-   * @param date2 the newest date
+   *
+   * @param date1    the oldest date
+   * @param date2    the newest date
    * @param timeUnit the unit in which you want the diff
    * @return the diff value, in the provided unit
    */
   public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
     long diffInMillies = date2.getTime() - date1.getTime();
-    Log.d("DateUtil",String.format("diff betwin %s and %s is %d",DateUtil.toLongDate(date1),DateUtil.toLongDate(date2),diffInMillies));
-    return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+    Log.d("DateUtil", String.format("diff betwin %s and %s is %d", DateUtil.toLongDate(date1), DateUtil.toLongDate(date2), diffInMillies));
+    return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
   }
 
   public static String toShortDate(Date date) {
     return shortFormatter.format(date);
   }
 
-  public  static String toLongDate(Date date) {
+  public static String toLongDate(Date date) {
     return longFormatter.format(date);
   }
 
-  public  static String toDuration(Date date) {
+  public static String toDuration(Date date) {
     return durationFormatter.format(date);
   }
 
-  public static String toTimeFormat(Date date){
+  public static String toTimeFormat(Date date) {
     return timeFormatter.format(date);
   }
 
-  public static Date parseLongDate(String date)  {
+  public static Date parseLongDate(String date) {
     try {
       return longFormatter.parse(date);
     } catch (ParseException e) {
@@ -59,7 +61,7 @@ public class DateUtil {
     return new Date(0);
   }
 
-  public  static Date parseShortDate(String date){
+  public static Date parseShortDate(String date) {
     try {
       return shortFormatter.parse(date);
     } catch (ParseException e) {
@@ -70,11 +72,11 @@ public class DateUtil {
     return new Date(0);
   }
 
-  public static String durationToTime(long duration){
+  public static String durationToTime(long duration) {
     duration = Math.abs(duration);
     long hours = duration / 3600;
     long minutes = (duration % 3600) / 60;
-    return String.format("%02d:%02d",hours,minutes);
+    return String.format("%02d:%02d", hours, minutes);
 
   }
 

@@ -36,8 +36,8 @@ public class ApiRequestInterceptor implements RequestInterceptor {
   @Override
   public void intercept(RequestFacade requestFacade) {
 
-   final String authorizationValue = encodeCredentialsForBasicAuthorization();
-   requestFacade.addHeader("Authorization", authorizationValue);
+    final String authorizationValue = encodeCredentialsForBasicAuthorization();
+    requestFacade.addHeader("Authorization", authorizationValue);
   }
 
   private String encodeCredentialsForBasicAuthorization() {

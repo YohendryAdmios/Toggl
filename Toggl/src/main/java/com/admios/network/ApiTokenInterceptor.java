@@ -7,7 +7,7 @@ import retrofit.RequestInterceptor;
 /**
  * Created by yohendryhurtado on 3/4/14.
  */
-public class ApiTokenInterceptor implements RequestInterceptor  {
+public class ApiTokenInterceptor implements RequestInterceptor {
   private String apiToken;
 
   public String getApiToken() {
@@ -18,7 +18,7 @@ public class ApiTokenInterceptor implements RequestInterceptor  {
     this.apiToken = apiToken;
   }
 
-  public ApiTokenInterceptor(String apiToken){
+  public ApiTokenInterceptor(String apiToken) {
     setApiToken(apiToken);
   }
 
@@ -30,8 +30,8 @@ public class ApiTokenInterceptor implements RequestInterceptor  {
   }
 
   private String encodeCredentialsForBasicAuthorization() {
-    final String userAndPassword = getApiToken()+":api_token";
+    final String userAndPassword = getApiToken() + ":api_token";
     final int flags = 0;
-    return "Basic " + Base64.encodeToString(userAndPassword.getBytes(),flags);
+    return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), flags);
   }
 }

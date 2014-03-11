@@ -13,9 +13,7 @@ import com.admios.app.R;
 import com.admios.model.TimeEntry;
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -132,7 +130,7 @@ public class TimeEntryAdapter extends ArrayAdapter<TimeEntry> {
     dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
     dateTextView.setText(DateUtil.toShortDate(DateUtil.parseLongDate(timeEntry.getStart())));
     totalTextView = (TextView) convertView.findViewById(R.id.durationTextView);
-    totalTextView.setText(String.format("Total %s Hrs",DateUtil.durationToTime(timeEntry.getDuration())));
+    totalTextView.setText(String.format("Total %s Hrs", DateUtil.durationToTime(timeEntry.getDuration())));
 
 
     return convertView;

@@ -5,12 +5,9 @@ import com.admios.model.Project;
 import com.admios.model.TimeEntry;
 import com.admios.model.User;
 
-import java.util.Date;
 import java.util.List;
 
-import retrofit.http.DELETE;
 import retrofit.http.GET;
-import retrofit.http.PATCH;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
@@ -22,7 +19,7 @@ public interface TogglService {
   User login();
 
   @GET("/time_entries")
-  List<TimeEntry> timeEntries(@Query("start_date") String start,@Query("end_date") String end);
+  List<TimeEntry> timeEntries(@Query("start_date") String start, @Query("end_date") String end);
 
   @GET("/clients")
   List<Client> getClients();

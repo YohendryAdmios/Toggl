@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.admios.app.util.DateUtil;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -86,19 +85,19 @@ public class TimeEntry {
   }
 
   public long getDuration() {
-    if(!this.isNew() || (this.getType() == TimeEntry.SEPARATOR)){
+    if (!this.isNew() || (this.getType() == TimeEntry.SEPARATOR)) {
       return duration;
     } else {
-        return calculateDuration();
+      return calculateDuration();
     }
 
   }
 
   private long calculateDuration() {
 
-    Log.d("TimeEntry",String.format("%s and %s",getStart(),getStop()));
+    Log.d("TimeEntry", String.format("%s and %s", getStart(), getStop()));
     Date start = DateUtil.parseLongDate(getStart());
-    Date end =  DateUtil.parseLongDate(getStop());
+    Date end = DateUtil.parseLongDate(getStop());
 
     return DateUtil.getDateDiff(start, end, TimeUnit.SECONDS);
   }
@@ -133,8 +132,8 @@ public class TimeEntry {
     return null;
   }
 
-  public boolean isNew(){
-    if(getId() > 0){
+  public boolean isNew() {
+    if (getId() > 0) {
       return false;
     }
     return true;
