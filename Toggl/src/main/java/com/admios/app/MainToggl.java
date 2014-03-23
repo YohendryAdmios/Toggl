@@ -35,6 +35,7 @@ import com.admios.model.User;
 import com.admios.network.ApiTokenInterceptor;
 import com.admios.network.NetworkErrorHandler;
 import com.admios.network.TogglService;
+import com.admios.network.TypedJsonString;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -96,6 +97,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private ToggleButton mEditBillableButton;
   private boolean forceLoadClients = false;
   private Writer w;
+  private Button mSaveButton;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +175,35 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
     mEditBillableButton = (ToggleButton) findViewById(R.id.toggleButton);
 
+    mSaveButton = (Button) findViewById(R.id.saveButton);
+    mSaveButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        updateCurrentTimeEntry();
+        if(!currentTimeEntry.isNew()) {
+          new updateTimeEntryTask().execute();
+        } else {
+          Toast.makeText(v.getContext(),"Not implemented",Toast.LENGTH_LONG).show();
+        }
+
+      }
+    });
+
     refresh();
+  }
+
+  private void updateCurrentTimeEntry() {
+    currentTimeEntry.setDescription(mEditDescriptionEditText.getText().toString());
+  }
+
+  private class updateTimeEntryTask extends AsyncTask<Void, Void, Void> {
+
+    @Override
+    protected Void doInBackground(Void... params) {
+      TypedJsonString body = new TypedJsonString("time_entry",gson.toJson(currentTimeEntry));
+      service.updateTimeEntry(currentTimeEntry.getId(),body);
+      return null;
+    }
   }
 
   private void setDateEntryListeners() {
