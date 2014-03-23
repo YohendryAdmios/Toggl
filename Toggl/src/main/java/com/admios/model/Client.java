@@ -1,11 +1,15 @@
 package com.admios.model;
 
+import com.google.gson.Gson;
+
+import java.io.Externalizable;
+
 import java.util.List;
 
 /**
  * Created by yohendryhurtado on 3/7/14.
  */
-public class Client {
+public class Client{
   private int id;
   private String name;
   private List<Project> projects;
@@ -38,4 +42,6 @@ public class Client {
   public String toString() {
     return this.getName();
   }
+
+
 }

@@ -27,6 +27,7 @@ import android.widget.ToggleButton;
 import com.admios.app.util.DateUtil;
 import com.admios.app.util.ProjectAdapter;
 import com.admios.app.util.TimeEntryAdapter;
+import com.admios.app.util.Writer;
 import com.admios.model.Client;
 import com.admios.model.Project;
 import com.admios.model.TimeEntry;
@@ -41,6 +42,8 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 import com.squareup.timessquare.CalendarPickerView;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,6 +94,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private ListView lv;
   private EditText mEditDescriptionEditText;
   private ToggleButton mEditBillableButton;
+  private boolean forceLoadClients = false;
+  private Writer w;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +104,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mMainContainer = findViewById(R.id.container);
     mLoadingView = findViewById(R.id.loading_status);
     mEditContainer = findViewById(R.id.edit_container);
+
+    w = new Writer(this);
 
     hideKeyboard();
     loadUser();
@@ -376,11 +383,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       case R.id.action_log_out:
         logOut();
         return true;
-      case R.id.action_main:
-        showEdit(false);
-        return true;
-      case R.id.action_edit:
-        showEdit(true);
+      case R.id.action_force_load_clients:
+        forceLoadClients = true;
+        refresh();
         return true;
       default:
         return super.onOptionsItemSelected(item);
@@ -465,6 +470,18 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void loadClients() {
+    try{
+      clients = w.readClients();
+        if(forceLoadClients){
+          loadClientsFromServer();
+        }
+    } catch (IOException e) {
+      loadClientsFromServer();
+    }
+
+  }
+
+  public void loadClientsFromServer(){
     clients = service.getClients();
     List<Client> toRemove = new ArrayList<Client>();
     for (Client client : clients) {
@@ -477,6 +494,14 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     for (Client client : toRemove) {
       clients.remove(client);
     }
+    forceLoadClients = false;
+    saveClients();
+  }
+
+  private boolean saveClients(){
+
+    w.writeClients(clients);
+    return  false;
   }
 
   private Drawable loadProfile() {

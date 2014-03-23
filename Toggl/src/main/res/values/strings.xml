@@ -11,5 +11,6 @@
     <string name="billable">Billable</string>
     <string name="main">Back to main</string>
     <string name="shoe_edit">Show edit</string><string name="delete_button">Delete</string><string name="cancel_button">Cancel</string><string name="save_button">Save</string>
+    <string name="force_load_clients">Force Load Clients</string>
 
 </resources>
