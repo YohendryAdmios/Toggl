@@ -85,7 +85,7 @@ public class TimeEntry {
   }
 
   public long getDuration() {
-    if (!this.isNew() || (this.getType() == TimeEntry.SEPARATOR)) {
+    if ((this.getType() == TimeEntry.SEPARATOR)) {
       return duration;
     } else {
       return calculateDuration();
