@@ -31,6 +31,7 @@ import com.admios.app.util.Writer;
 import com.admios.model.Client;
 import com.admios.model.Project;
 import com.admios.model.TimeEntry;
+import com.admios.model.TimeEntryWraper;
 import com.admios.model.User;
 import com.admios.network.ApiTokenInterceptor;
 import com.admios.network.NetworkErrorHandler;
@@ -98,6 +99,11 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private boolean forceLoadClients = false;
   private Writer w;
   private Button mSaveButton;
+  public final static int EDIT = 1;
+  public final static int CREATE = 2;
+  public final static int START = 3;
+  public final static int STOP = 4;
+  public final static int DELETE = 5;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -181,7 +187,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       public void onClick(View v) {
         updateCurrentTimeEntry();
         if(!currentTimeEntry.isNew()) {
-          new updateTimeEntryTask().execute();
+          new updateTimeEntryTask().execute(MainToggl.EDIT);
         } else {
           Toast.makeText(v.getContext(),"Not implemented",Toast.LENGTH_LONG).show();
         }
@@ -196,13 +202,68 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     currentTimeEntry.setDescription(mEditDescriptionEditText.getText().toString());
   }
 
-  private class updateTimeEntryTask extends AsyncTask<Void, Void, Void> {
+  private class updateTimeEntryTask extends AsyncTask<Integer, Void, Boolean> {
+    int type;
+    @Override
+    protected Boolean doInBackground(Integer... param) {
+
+      TypedJsonString body = new TypedJsonString("time_entry",gson.toJson(currentTimeEntry));
+      TimeEntryWraper te = null;
+        type = param[0];
+        switch (type) {
+          case MainToggl.EDIT:
+            te = service.updateTimeEntry(currentTimeEntry.getId(),body);
+          break;
+          case MainToggl.CREATE:
+
+          break;
+          case MainToggl.START:
+
+          break;
+          case MainToggl.STOP:
+
+          break;
+          case MainToggl.DELETE:
+
+          break;
+        }
+        if(te != null) {
+          Log.d("POO",gson.toJson(te));
+          currentTimeEntry = te.getData();
+          return true;
+        } else {
+          return false;
+        }
+
+    }
 
     @Override
-    protected Void doInBackground(Void... params) {
-      TypedJsonString body = new TypedJsonString("time_entry",gson.toJson(currentTimeEntry));
-      service.updateTimeEntry(currentTimeEntry.getId(),body);
-      return null;
+    protected void onPostExecute(Boolean aBoolean) {
+      String action = "";
+      switch (type){
+        case MainToggl.EDIT:
+          action = "updated";
+          break;
+        case MainToggl.CREATE:
+          action = "created";
+          break;
+        case MainToggl.START:
+          action = "started";
+          break;
+        case MainToggl.STOP:
+          action = "stoped";
+          break;
+        case MainToggl.DELETE:
+          action = "deleted";
+          break;
+      }
+      if(aBoolean){
+        Toast.makeText(getApplicationContext(),String.format("Time Entry %s",action),Toast.LENGTH_LONG).show();
+        loadTimeEntry();
+        printListView();
+      } else {
+        Toast.makeText(getApplicationContext(),String.format("Time Entry %s FAILED!",action),Toast.LENGTH_LONG).show();
+      }
     }
   }
 

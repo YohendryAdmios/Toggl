@@ -3,6 +3,7 @@ package com.admios.network;
 import com.admios.model.Client;
 import com.admios.model.Project;
 import com.admios.model.TimeEntry;
+import com.admios.model.TimeEntryWraper;
 import com.admios.model.User;
 
 import java.util.List;
@@ -30,6 +31,6 @@ public interface TogglService {
   List<Project> getProjectsByClient(@Path("client_id") int clientId);
 
   @PUT("/time_entries/{time_entry_id}")
-  TimeEntry updateTimeEntry(@Path("time_entry_id") int timeEntryId,@Body TypedJsonString body);
+  TimeEntryWraper updateTimeEntry(@Path("time_entry_id") int timeEntryId,@Body TypedJsonString body);
 
 }
