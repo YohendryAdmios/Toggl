@@ -40,9 +40,13 @@ import com.admios.network.TypedJsonString;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.squareup.picasso.Picasso;
 import com.squareup.timessquare.CalendarPickerView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -189,7 +193,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
         if(!currentTimeEntry.isNew()) {
           new updateTimeEntryTask().execute(MainToggl.EDIT);
         } else {
-          Toast.makeText(v.getContext(),"Not implemented",Toast.LENGTH_LONG).show();
+          new updateTimeEntryTask().execute(MainToggl.CREATE);
         }
 
       }
@@ -200,6 +204,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
   private void updateCurrentTimeEntry() {
     currentTimeEntry.setDescription(mEditDescriptionEditText.getText().toString());
+    currentTimeEntry.setPid(((Project)mProjectList.getSelectedItem()).getId());
   }
 
   private class updateTimeEntryTask extends AsyncTask<Integer, Void, Boolean> {
@@ -207,7 +212,21 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     @Override
     protected Boolean doInBackground(Integer... param) {
 
-      TypedJsonString body = new TypedJsonString("time_entry",gson.toJson(currentTimeEntry));
+      TypedJsonString body;
+      String json = "";
+      try {
+        JSONObject jObject = new JSONObject(gson.toJson(currentTimeEntry));
+        //jObject.remove("id");
+        jObject.put("created_with","Admios Toggl App");
+        jObject.put("start",DateUtil.prepareToServer(jObject.getString("start")));
+        jObject.put("stop",DateUtil.prepareToServer(jObject.getString("stop")));
+        jObject.put("at",DateUtil.prepareToServer(jObject.getString("at")));
+        jObject.put("duration",currentTimeEntry.getDuration());
+        json = jObject.toString();
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+      body = new TypedJsonString("time_entry",json);
       TimeEntryWraper te = null;
         type = param[0];
         switch (type) {
@@ -216,6 +235,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
           break;
           case MainToggl.CREATE:
 
+            te = service.createTimeEntry(body);
+            timeEntries.add(te.getData());
           break;
           case MainToggl.START:
 
@@ -260,7 +281,8 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       if(aBoolean){
         Toast.makeText(getApplicationContext(),String.format("Time Entry %s",action),Toast.LENGTH_LONG).show();
         loadTimeEntry();
-        printListView();
+        forceLoadClients = false;
+        refresh();
       } else {
         Toast.makeText(getApplicationContext(),String.format("Time Entry %s FAILED!",action),Toast.LENGTH_LONG).show();
       }
@@ -622,7 +644,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     currentTimeEntry.setStart(DateUtil.toLongDate(now));
     currentTimeEntry.setStop(DateUtil.toLongDate(now));
     currentTimeEntry.setAt(DateUtil.toLongDate(now));
-    Log.d("HEY", String.format("new TimeEntry %s", gson.toJson(currentTimeEntry)));
+    Log.d("NEW", String.format("new TimeEntry %s", gson.toJson(currentTimeEntry)));
   }
 
   @Override

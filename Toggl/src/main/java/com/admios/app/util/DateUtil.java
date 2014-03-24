@@ -77,7 +77,19 @@ public class DateUtil {
     long hours = duration / 3600;
     long minutes = (duration % 3600) / 60;
     return String.format("%02d:%02d", hours, minutes);
+  }
 
+  public static String prepareToServer(String time){
+    String timeZone = time.substring(time.length()-5,time.length());
+    String newDate = "";
+    if(timeZone.lastIndexOf(":")>0){
+      newDate = time;
+
+    } else {
+      newDate = String.format("%s:%s",time.substring(0,time.length()-2),time.substring(time.length()-2));
+    }
+
+    return newDate;
   }
 
 

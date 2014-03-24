@@ -1,5 +1,8 @@
 package com.admios.network;
 
+import android.util.Log;
+
+import com.admios.exception.BadRequestException;
 import com.admios.exception.ForbiddenException;
 
 import retrofit.ErrorHandler;
@@ -15,7 +18,12 @@ public class NetworkErrorHandler implements ErrorHandler {
     Response r = cause.getResponse();
     if (r != null && r.getStatus() == 403) {
       return new ForbiddenException(cause);
+    } else if (r != null && r.getStatus() == 400){
+      Log.e("RETROFIT", r.getReason());
+      return new BadRequestException(cause);
     }
     return cause;
   }
+
+
 }

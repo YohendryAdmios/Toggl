@@ -10,6 +10,7 @@ import java.util.List;
 
 import retrofit.http.Body;
 import retrofit.http.GET;
+import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
 import retrofit.http.Query;
@@ -32,5 +33,8 @@ public interface TogglService {
 
   @PUT("/time_entries/{time_entry_id}")
   TimeEntryWraper updateTimeEntry(@Path("time_entry_id") int timeEntryId,@Body TypedJsonString body);
+
+  @POST("/time_entries")
+  TimeEntryWraper createTimeEntry(@Body TypedJsonString body);
 
 }
