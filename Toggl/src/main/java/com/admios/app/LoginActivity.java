@@ -311,7 +311,8 @@ public class LoginActivity extends Activity {
         editor.putString("api_token", user.getData().getApiToken());
         editor.commit();
       } catch (Exception e) {
-        if (e.getCause().toString().equalsIgnoreCase(ForbiddenException.class.toString())) {
+        Log.e("ERROR",e.getCause().getClass().getName());
+        if (e.getCause().getClass().getName().equalsIgnoreCase("com.admios.exception.ForbiddenException")) {
           return UserLoginTask.BAD_LOGIN;
         }
         return UserLoginTask.ERROR;
@@ -332,6 +333,10 @@ public class LoginActivity extends Activity {
       } else if (status == UserLoginTask.BAD_LOGIN) {
         mPasswordView.setText("");
         mPasswordView.setError(getString(R.string.error_incorrect_password));
+        mPasswordView.requestFocus();
+      } else if (status == UserLoginTask.ERROR) {
+        mPasswordView.setText("");
+        mPasswordView.setError("ERROR");
         mPasswordView.requestFocus();
       }
     }
