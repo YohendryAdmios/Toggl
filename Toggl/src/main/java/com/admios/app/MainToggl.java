@@ -329,7 +329,15 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   private void showTimeDialog(final EditText textField) {
 
     timeDialogView = (FrameLayout) getLayoutInflater().inflate(R.layout.time_dialog, null, false);
-
+    tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
+    Calendar calendar = Calendar.getInstance();
+    if (textField.getId() == R.id.startedEditText) {
+      calendar.setTime(DateUtil.parseLongDate(currentTimeEntry.getStart()));
+    } else {
+      calendar.setTime(DateUtil.parseLongDate(currentTimeEntry.getStop()));
+    }
+    tp.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
+    tp.setCurrentMinute(calendar.get(Calendar.MINUTE));
     timeDialog =
             new AlertDialog.Builder(MainToggl.this).setTitle("Select Hour")
                     .setView(timeDialogView)
@@ -342,19 +350,34 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
                     .setPositiveButton("Select", new DialogInterface.OnClickListener() {
                       @Override
                       public void onClick(DialogInterface dialogInterface, int i) {
-                        tp = (TimePicker) timeDialogView.findViewById(R.id.timePicker);
+
                         Calendar calendar = Calendar.getInstance();
                         calendar.setTime(DateUtil.parseLongDate(currentTimeEntry.getStart()));
                         calendar.set(Calendar.HOUR_OF_DAY, tp.getCurrentHour());
                         calendar.set(Calendar.MINUTE, tp.getCurrentMinute());
-                        Log.d("HEY","before > "+gson.toJson(currentTimeEntry));
+                        Log.d("HEY", "before > " + gson.toJson(currentTimeEntry));
                         if (textField.getId() == R.id.startedEditText) {
-                          currentTimeEntry.setStart(DateUtil.toLongDate(calendar.getTime()));
+                          Date start = DateUtil.parseLongDate(DateUtil.toLongDate(calendar.getTime()));
+                          Date stop = DateUtil.parseLongDate(currentTimeEntry.getStop());
+                          if (start.compareTo(stop) < 0) {
+                            currentTimeEntry.setStart(DateUtil.toLongDate(calendar.getTime()));
+                          } else {
+                            Toast.makeText(getApplicationContext(), "Start data must be before stop date", Toast.LENGTH_LONG).show();
+                          }
+
                         } else {
-                          currentTimeEntry.setStop(DateUtil.toLongDate(calendar.getTime()));
+                          Date stop = DateUtil.parseLongDate(DateUtil.toLongDate(calendar.getTime()));
+                          Date start = DateUtil.parseLongDate(currentTimeEntry.getStart());
+                          if (start.compareTo(stop) < 0) {
+                            currentTimeEntry.setStop(DateUtil.toLongDate(calendar.getTime()));
+                          } else {
+                            Toast.makeText(getApplicationContext(), "Start data must be before stop date", Toast.LENGTH_LONG).show();
+                          }
                         }
-                        Log.d("HEY","after > "+gson.toJson(currentTimeEntry));
+                        Log.d("HEY", "after > " + gson.toJson(currentTimeEntry));
                         loadTimeEntry();
+
+
                         dialogInterface.dismiss();
 
                       }
