@@ -28,6 +28,7 @@ import com.admios.app.util.DateUtil;
 import com.admios.app.util.ProjectAdapter;
 import com.admios.app.util.TimeEntryAdapter;
 import com.admios.app.util.Writer;
+import com.admios.exception.BadRequestException;
 import com.admios.model.Client;
 import com.admios.model.Project;
 import com.admios.model.TimeEntry;
@@ -108,6 +109,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   public final static int START = 3;
   public final static int STOP = 4;
   public final static int DELETE = 5;
+  private ArrayList<Project> projects;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -199,12 +201,21 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       }
     });
 
+    mEditDeleteButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        updateCurrentTimeEntry();
+        new updateTimeEntryTask().execute(MainToggl.DELETE);
+      }
+    });
+
     refresh();
   }
 
   private void updateCurrentTimeEntry() {
     currentTimeEntry.setDescription(mEditDescriptionEditText.getText().toString());
     currentTimeEntry.setPid(((Project)mProjectList.getSelectedItem()).getId());
+    currentTimeEntry.setBillable(mEditBillableButton.isChecked());
   }
 
   private class updateTimeEntryTask extends AsyncTask<Integer, Void, Boolean> {
@@ -216,7 +227,6 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       String json = "";
       try {
         JSONObject jObject = new JSONObject(gson.toJson(currentTimeEntry));
-        //jObject.remove("id");
         jObject.put("created_with","Admios Toggl App");
         jObject.put("start",DateUtil.prepareToServer(jObject.getString("start")));
         jObject.put("stop",DateUtil.prepareToServer(jObject.getString("stop")));
@@ -226,8 +236,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       } catch (JSONException e) {
         e.printStackTrace();
       }
-      body = new TypedJsonString("time_entry",json);
-      TimeEntryWraper te = null;
+      try{
+        body = new TypedJsonString("time_entry",json);
+        TimeEntryWraper te = null;
         type = param[0];
         switch (type) {
           case MainToggl.EDIT:
@@ -245,16 +256,16 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
           break;
           case MainToggl.DELETE:
-
+            te = service.deleteTimeEntry(currentTimeEntry.getId());
+            timeEntries.remove(currentTimeEntry);
           break;
         }
-        if(te != null) {
-          Log.d("POO",gson.toJson(te));
-          currentTimeEntry = te.getData();
-          return true;
-        } else {
-          return false;
-        }
+      } catch (Exception e){
+        return false;
+      } finally {
+        return true;
+      }
+
 
     }
 
@@ -455,6 +466,14 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mDurationEdit.setText(DateUtil.durationToTime(currentTimeEntry.getDuration()));
     mEditBillableButton.setChecked(currentTimeEntry.isBillable());
 
+    for (int i = 0; i < projects.size(); i++) {
+      if(projects.get(i).getId() == currentTimeEntry.getPid()){
+        mProjectList.setSelection(i);
+        break;
+      }
+    }
+
+
   }
 
   private void buildApiAdapter() {
@@ -557,7 +576,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
   }
 
   private void addProjectsToSpinner() {
-    List<Project> projects = new ArrayList<Project>();
+    projects = new ArrayList<Project>();
     for (Client client : clients) {
       for (Project project : client.getProjects()) {
         project.setClientName(client.getName());

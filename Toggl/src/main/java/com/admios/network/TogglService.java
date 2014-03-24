@@ -9,6 +9,7 @@ import com.admios.model.User;
 import java.util.List;
 
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
@@ -33,6 +34,9 @@ public interface TogglService {
 
   @PUT("/time_entries/{time_entry_id}")
   TimeEntryWraper updateTimeEntry(@Path("time_entry_id") int timeEntryId,@Body TypedJsonString body);
+
+  @DELETE("/time_entries/{time_entry_id}")
+  TimeEntryWraper deleteTimeEntry(@Path("time_entry_id") int timeEntryId);
 
   @POST("/time_entries")
   TimeEntryWraper createTimeEntry(@Body TypedJsonString body);
