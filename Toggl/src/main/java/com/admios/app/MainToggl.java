@@ -455,6 +455,9 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     mEditContainer.setVisibility(show ? View.VISIBLE : View.GONE);
     mMainContainer.setVisibility(show ? View.GONE : View.VISIBLE);
     mLoadingView.setVisibility(View.GONE);
+    if(show){
+      mEditDescriptionEditText.requestFocus();
+    }
   }
 
   private void loadTimeEntry() {
