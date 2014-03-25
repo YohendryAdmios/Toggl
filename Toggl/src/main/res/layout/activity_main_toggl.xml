@@ -101,21 +101,9 @@
                     android:layout_below="@+id/descriptionEditText"
                     android:layout_alignLeft="@+id/descriptionEditText"
                     android:layout_alignStart="@+id/descriptionEditText"
-                    android:layout_toLeftOf="@+id/buttonStart"
-                    android:layout_marginBottom="5dp"/>
+                    android:layout_marginBottom="5dp"
+                    android:layout_alignRight="@+id/descriptionEditText"/>
 
-                <Button
-                    android:id="@+id/buttonStart"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:drawableRight="@android:drawable/ic_media_play"
-                    android:layout_alignRight="@+id/descriptionEditText"
-                    android:layout_alignEnd="@+id/descriptionEditText"
-                    android:layout_alignBottom="@+id/timeEditText"
-                    android:layout_below="@+id/descriptionEditText"
-                    android:layout_marginLeft="5dp"
-                    android:background="@drawable/button_continue"
-                    />
             </RelativeLayout>
 
             <LinearLayout

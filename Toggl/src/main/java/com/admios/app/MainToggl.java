@@ -224,25 +224,14 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
     protected Boolean doInBackground(Integer... param) {
 
       TypedJsonString body;
-      String json = "";
-      try {
-        JSONObject jObject = new JSONObject(gson.toJson(currentTimeEntry));
-        jObject.put("created_with","Admios Toggl App");
-        jObject.put("start",DateUtil.prepareToServer(jObject.getString("start")));
-        jObject.put("stop",DateUtil.prepareToServer(jObject.getString("stop")));
-        jObject.put("at",DateUtil.prepareToServer(jObject.getString("at")));
-        jObject.put("duration",currentTimeEntry.getDuration());
-        json = jObject.toString();
-      } catch (JSONException e) {
-        e.printStackTrace();
-      }
+
       try{
-        body = new TypedJsonString("time_entry",json);
+        body = new TypedJsonString("time_entry",prepateTimeEntryBody());
         TimeEntryWraper te = null;
         type = param[0];
         switch (type) {
           case MainToggl.EDIT:
-            te = service.updateTimeEntry(currentTimeEntry.getId(),body);
+            service.updateTimeEntry(currentTimeEntry.getId(), body);
           break;
           case MainToggl.CREATE:
 
@@ -256,7 +245,7 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
 
           break;
           case MainToggl.DELETE:
-            te = service.deleteTimeEntry(currentTimeEntry.getId());
+            service.deleteTimeEntry(currentTimeEntry.getId());
             timeEntries.remove(currentTimeEntry);
           break;
         }
@@ -265,8 +254,22 @@ public class MainToggl extends ActionBarActivity implements ActionBar.OnNavigati
       } finally {
         return true;
       }
+    }
 
-
+    private String prepateTimeEntryBody(){
+      String json = "";
+      try {
+        JSONObject jObject = new JSONObject(gson.toJson(currentTimeEntry));
+        jObject.put("created_with","Admios Toggl App");
+        jObject.put("start",DateUtil.prepareToServer(jObject.getString("start")));
+        jObject.put("stop",DateUtil.prepareToServer(jObject.getString("stop")));
+        jObject.put("at",DateUtil.prepareToServer(jObject.getString("at")));
+        jObject.put("duration",currentTimeEntry.getDuration());
+        json = jObject.toString();
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+      return json;
     }
 
     @Override

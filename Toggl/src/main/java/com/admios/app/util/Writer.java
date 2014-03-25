@@ -8,16 +8,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,12 +29,12 @@ public class Writer {
 
   public void writeClients(List<Client> clients){
     String clintString = gson.toJson(clients);
-    writeToFile("/clients.json ",clintString);
+    writeToFile("clients.json ",clintString);
     Log.d("HEY",String.format("writting clients %s on %s",clintString,context.getFilesDir()));
   }
 
-  public List<Client> readClients() throws IOException,FileNotFoundException {
-    String clients_s = readFromFile("/clients.json ");
+  public List<Client> readClients() throws IOException {
+    String clients_s = readFromFile("clients.json ");
     Type collectionType = new TypeToken<List<Client>>() {
     }.getType();
 
@@ -49,23 +45,22 @@ public class Writer {
 
   private void writeToFile(String name, String data) {
     try {
-      File file = new File(context.getExternalFilesDir(null).getPath()+name);
-      file.getParentFile().mkdirs();
-      OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file));
+
+      OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(name,context.MODE_PRIVATE));
       outputStreamWriter.write(data);
       outputStreamWriter.close();
-      Log.d("HEY",String.format("writting file %s",file.getAbsolutePath()));
+
     }
     catch (IOException e) {
       Log.e("HEY", "File write failed: " + e.toString());
     }
   }
 
-  private String readFromFile(String name) throws IOException,FileNotFoundException {
+  private String readFromFile(String name) throws IOException {
 
     String ret = "";
-    File file = new File(context.getExternalFilesDir(null).getPath()+name);
-      InputStream inputStream = new FileInputStream(file);
+
+      InputStream inputStream =context.openFileInput(name);
 
       if ( inputStream != null ) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
